@@ -380,7 +380,7 @@ class RepeatedHoldOut(base.MLValidation):
 
 class RepeatedHoldOutFeautureSelection(base.MLValidation):
 
-    def __init__(self, ml_algorithm, n_iterations=100, test_size=0.3, nested_fs=True):
+    def __init__(self, ml_algorithm, n_iterations=100, test_size=0.3):
         self._ml_algorithm = ml_algorithm
         self._split_results = []
         self._classifier = None

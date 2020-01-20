@@ -9,7 +9,9 @@ __status__ = "Development"
 import os
 import errno
 from pandas.io import parsers
-from mlworkflow_dwi import DWI_VB_RepHoldOut_DualSVM, DWI_RB_RepHoldOut_DualSVM, DWI_VB_RepHoldOut_DualSVM_FeatureSelectionNested, DWI_VB_RepHoldOut_DualSVM_FeatureSelectionNonNested
+from mlworkflow_dwi import DWI_VB_RepHoldOut_DualSVM, DWI_RB_RepHoldOut_DualSVM, DWI_RB_RepHoldOut_DualSVM_FeatureSelectionNested, \
+    DWI_VB_RepHoldOut_DualSVM_FeatureSelectionNested, DWI_VB_RepHoldOut_DualSVM_FeatureSelectionNonNested, T1_RB_RepHoldOut_DualSVM_FeatureSelectionNested, \
+    T1_VB_RepHoldOut_DualSVM_FeatureSelectionNested
 import numpy as np
 import matplotlib.pyplot as plt
 import pandas as pd
@@ -17,11 +19,10 @@ from clinica.pipelines.machine_learning.ml_workflows import RB_RepHoldOut_DualSV
 from os import path
 from scipy import stats
 
-
-
 def run_voxel_based_classification(caps_directory, diagnoses_tsv, subjects_visits_tsv, output_dir, task, n_threads, n_iterations, test_size, grid_search_folds,
                                    balanced_down_sample=False, modality='dwi', dwi_maps=['fa', 'md'], fwhm=[8],
-                                   tissue_type = ['WM', 'GM', 'GM_WM'], threshold=[0.3], group_id='ADNIbl', feature_selection_nested=False, feature_selection_non_nested=False, top_k=[50], feature_selection_method='ANOVA'):
+                                   tissue_type = ['WM', 'GM', 'GM_WM'], threshold=[0.3], group_id='ADNIbl', feature_selection_nested=True,
+                                   feature_selection_non_nested=False, top_k=[50], feature_selection_method='zscore'):
     """
     This is a function to run the Voxel-based calssification tasks_imbalanced after the imaging processing pipeline of ADNI
     :param caps_directory: caps directory for Clinica outputs
@@ -153,10 +154,19 @@ def run_voxel_based_classification(caps_directory, diagnoses_tsv, subjects_visit
                     os.makedirs(classification_dir)
 
                     print "\nRunning %s" % classification_dir
-                    wf = VB_RepHoldOut_DualSVM(caps_directory, subjects_visits_tsv, diagnoses_tsv, group_id, modality,
-                                               classification_dir, fwhm=k, n_threads=n_threads,
-                                               n_iterations=n_iterations,
-                                               test_size=test_size, splits_indices=splits_indices)
+
+                    if feature_selection_nested == True:
+                        print 'Original data classification with nested feature rescaling procedures!!!'
+                        wf = T1_VB_RepHoldOut_DualSVM_FeatureSelectionNested(caps_directory, subjects_visits_tsv, diagnoses_tsv, group_id,
+                                                   modality,
+                                                   classification_dir, fwhm=k, n_threads=n_threads,
+                                                   n_iterations=n_iterations,
+                                                   test_size=test_size, splits_indices=splits_indices, feature_selection_method='zscore')
+                    else:
+                        wf = VB_RepHoldOut_DualSVM(caps_directory, subjects_visits_tsv, diagnoses_tsv, group_id, modality,
+                                                   classification_dir, fwhm=k, n_threads=n_threads,
+                                                   n_iterations=n_iterations,
+                                                   test_size=test_size, splits_indices=splits_indices)
                     wf.run()
                 else:
                     print "This combination has been classified, just skip: %s " % classification_dir
@@ -166,7 +176,7 @@ def run_voxel_based_classification(caps_directory, diagnoses_tsv, subjects_visit
 
 def run_roi_based_classification(caps_directory, diagnoses_tsv, subjects_visits_tsv, output_dir, atlas,
                                 task, n_threads, n_iterations, test_size, grid_search_folds, balanced_down_sample=False,
-                                 dwi_maps=['fa', 'md'], modality='dwi', group_id='ADNIbl'):
+                                 dwi_maps=['fa', 'md'], modality='dwi', group_id='ADNIbl', feature_selection_nested=True):
     """
     This is a function to run the Voxel-based calssification tasks_imbalanced after the imaging processing pipeline of ADNI
     :param caps_directory: caps directory for Clinica outputs
@@ -200,7 +210,6 @@ def run_roi_based_classification(caps_directory, diagnoses_tsv, subjects_visits_
                                 os.makedirs(classification_dir)
 
                                 print "\nRunning %s" % classification_dir
-
                                 wf = DWI_RB_RepHoldOut_DualSVM(caps_directory, subjects_visits_tsv, diagnoses_tsv, i, dwi_map,
                                                            classification_dir,
                                                            n_threads=n_threads, n_iterations=n_iterations,
@@ -208,6 +217,7 @@ def run_roi_based_classification(caps_directory, diagnoses_tsv, subjects_visits_
                                                            grid_search_folds=grid_search_folds,
                                                                splits_indices=splits_indices)
                                 wf.run()
+
                             else:
                                 print "This combination has been classified, just skip: %s " % classification_dir
 
@@ -224,12 +234,24 @@ def run_roi_based_classification(caps_directory, diagnoses_tsv, subjects_visits_
                                 os.makedirs(classification_dir)
 
                                 print "\nRunning %s" % classification_dir
-                                wf = DWI_RB_RepHoldOut_DualSVM(caps_directory, subjects_visits_tsv, diagnoses_tsv, i,
-                                                               dwi_map,
+                                if feature_selection_nested == False:
+                                    print 'Original data classification !!!'
+                                    wf = DWI_RB_RepHoldOut_DualSVM(caps_directory, subjects_visits_tsv, diagnoses_tsv, i, dwi_map,
                                                                classification_dir,
                                                                n_threads=n_threads, n_iterations=n_iterations,
                                                                test_size=test_size,
-                                                               grid_search_folds=grid_search_folds, splits_indices=splits_indices)
+                                                               grid_search_folds=grid_search_folds,
+                                                                   splits_indices=splits_indices)
+
+                                else:
+                                    print 'Original data classification with nested zscore feature resclaing procedures!!!'
+                                    wf = DWI_RB_RepHoldOut_DualSVM_FeatureSelectionNested(caps_directory, subjects_visits_tsv, diagnoses_tsv, i,
+                                                                   dwi_map,
+                                                                   classification_dir,
+                                                                   n_threads=n_threads, n_iterations=n_iterations,
+                                                                   test_size=test_size,
+                                                                   grid_search_folds=grid_search_folds,
+                                                                   splits_indices=splits_indices, feature_selection_method='zscore')
                                 wf.run()
                             else:
                                 print "This combination has been classified, just skip: %s " % classification_dir
@@ -265,10 +287,17 @@ def run_roi_based_classification(caps_directory, diagnoses_tsv, subjects_visits_
                     os.makedirs(classification_dir)
 
                     print "\nRunning %s" % classification_dir
-                    wf = RB_RepHoldOut_DualSVM(caps_directory, subjects_visits_tsv, diagnoses_tsv, group_id,
-                                               modality, i,
-                                               classification_dir, n_threads=n_threads, n_iterations=n_iterations,
-                                               test_size=test_size, splits_indices=splits_indices)
+                    if feature_selection_nested == True:
+                        print 'Original data classification with nested feature rescaling procedures!!!'
+                        T1_RB_RepHoldOut_DualSVM_FeatureSelectionNested(caps_directory, subjects_visits_tsv, diagnoses_tsv, group_id,
+                                                   modality, i,
+                                                   classification_dir, n_threads=n_threads, n_iterations=n_iterations,
+                                                   test_size=test_size, splits_indices=splits_indices, feature_selection_method='zscore')
+                    else:
+                        wf = RB_RepHoldOut_DualSVM(caps_directory, subjects_visits_tsv, diagnoses_tsv, group_id,
+                                                   modality, i,
+                                                   classification_dir, n_threads=n_threads, n_iterations=n_iterations,
+                                                   test_size=test_size, splits_indices=splits_indices)
                     wf.run()
                 else:
                     print "This combination has been classified, just skip: %s " % classification_dir

@@ -25,6 +25,7 @@ from sklearn.feature_selection import SelectKBest, f_classif, RFE, SelectPercent
 from clinica.pipelines.machine_learning import base
 import clinica.pipelines.machine_learning.svm_utils as utils
 from sklearn.decomposition import PCA
+from sklearn.preprocessing import StandardScaler
 
 
 class DualSVMAlgorithm(base.MLAlgorithm):
@@ -184,7 +185,7 @@ class DualSVMAlgorithmFeatureSelection(base.MLAlgorithm):
         self._grid_search_folds = grid_search_folds
         self._c_range = c_range
         self._n_threads = n_threads
-	self._feature_selection_method = feature_selection_method
+        self._feature_selection_method = feature_selection_method
 
     def _launch_svc(self, kernel_train, x_test, y_train, y_test, c):
 
@@ -230,35 +231,38 @@ class DualSVMAlgorithmFeatureSelection(base.MLAlgorithm):
 
         return {'c': best_c, 'balanced_accuracy': best_acc}
 
-    def evaluate(self, train_index, test_index, top_k):
+    def evaluate(self, train_index, test_index, top_k=50):
 
         inner_pool = ThreadPool(self._n_threads)
         async_result = {}
         for i in range(self._grid_search_folds):
             async_result[i] = {}
-	
-	if self._feature_selection_method == 'ANOVA':
-                selector = SelectPercentile(f_classif, percentile=top_k)
-                selector.fit(self._x[train_index], self._y[train_index])
-        elif self._feature_selection_method == 'RF':
-                clf = RandomForestClassifier(n_estimators=250, random_state=0, n_jobs=-1)
-                clf.fit(self._x[train_index], self._y[train_index])
-                selector = SelectFromModel(clf, threshold= top_k)
-                selector.fit(self._x[train_index], self._y[train_index])
-        elif self._feature_selection_method == 'PCA':
-                selector = PCA(n_components=top_k)
-                selector.fit(self._x[train_index])
-        elif self._feature_selection_method == 'RFE':
-		svc = SVR(kernel="linear")
-		selector = RFE(estimator=svc, n_features_to_select=int(0.01 * top_k * self._x[train_index].shape[1]), step=0.5)
-		selector.fit(self._x[train_index], self._y[train_index])
-	else:
-                print('Method has not been implemented')
 
-	x_after_fs = selector.transform(self._x)	
+        if self._feature_selection_method == 'ANOVA':
+            selector = SelectPercentile(f_classif, percentile=top_k)
+            selector.fit(self._x[train_index], self._y[train_index])
+        elif self._feature_selection_method == 'RF':
+            clf = RandomForestClassifier(n_estimators=250, random_state=0, n_jobs=-1)
+            clf.fit(self._x[train_index], self._y[train_index])
+            selector = SelectFromModel(clf, threshold= top_k)
+            selector.fit(self._x[train_index], self._y[train_index])
+        elif self._feature_selection_method == 'PCA':
+            selector = PCA(n_components=top_k)
+            selector.fit(self._x[train_index])
+        elif self._feature_selection_method == 'RFE':
+            svc = SVR(kernel="linear")
+            selector = RFE(estimator=svc, n_features_to_select=int(0.01 * top_k * self._x[train_index].shape[1]), step=0.5)
+            selector.fit(self._x[train_index], self._y[train_index])
+        elif self._feature_selection_method == 'zscore':
+            selector = StandardScaler()
+            selector.fit(self._x[train_index], self._y[train_index])
+        else:
+            print('Method has not been implemented')
+
+        x_after_fs = selector.transform(self._x)
         #indices_fs_train = selector.get_support()
         #x_after_fs = self._x[:, indices_fs_train]
-	print 'In total, there are %d voxels in this task' % self._x[train_index].shape[1]
+        print 'In total, there are %d voxels in this task' % self._x[train_index].shape[1]
         print 'The threshold is %s' % str(top_k)
         print 'We select the %d most discriminative voxels' % x_after_fs.shape[1]
 
