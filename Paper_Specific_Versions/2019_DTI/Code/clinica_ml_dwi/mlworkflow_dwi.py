@@ -193,7 +193,7 @@ class DWI_VB_RepHoldOut_DualSVM(MLWorkflow):
 
     def __init__(self, caps_directory, subjects_visits_tsv, diagnoses_tsv, dwi_map, tissue_type, threshold, output_dir, fwhm=None,
                  n_threads=15, n_iterations=100, test_size=0.3,
-                 grid_search_folds=10, balanced=True, c_range=np.logspace(-6, 2, 17), splits_indices=None):
+                 grid_search_folds=10, balanced=True, c_range=np.logspace(-6, 2, 17), splits_indices=None, caps_reg_method='single_modal'):
         ## TODO, the parameter balanced here by default is True, I changed it to False just for DTI paper.
 
         self._output_dir = output_dir # DTI_SVM folder to contain the outputf
@@ -204,8 +204,9 @@ class DWI_VB_RepHoldOut_DualSVM(MLWorkflow):
         self._balanced = balanced
         self._c_range = c_range # the hyperparameteWr to tune
         self._splits_indices = splits_indices
+        self._caps_reg_method = caps_reg_method
 
-        self._input = DWIVoxelBasedInput(caps_directory, subjects_visits_tsv, diagnoses_tsv, dwi_map, tissue_type, threshold, fwhm)
+        self._input = DWIVoxelBasedInput(caps_directory, subjects_visits_tsv, diagnoses_tsv, dwi_map, tissue_type, threshold, fwhm, self._caps_reg_method)
         self._validation = None
         self._algorithm = None
 
@@ -336,7 +337,7 @@ class DWI_VB_RepHoldOut_DualSVM_FeatureSelectionNested(MLWorkflow):
 
     def __init__(self, caps_directory, subjects_visits_tsv, diagnoses_tsv, dwi_map, tissue_type, threshold, output_dir, fwhm=None,
                  n_threads=15, n_iterations=100, test_size=0.3,
-                 grid_search_folds=10, balanced=True, c_range=np.logspace(-6, 2, 17), splits_indices=None, top_k=50,
+                 grid_search_folds=10, balanced=True, c_range=np.logspace(-6, 2, 17), splits_indices=None, caps_reg_method='single_modal', top_k=50,
                  feature_selection_method=None):
 
         self._output_dir = output_dir # DTI_SVM folder to contain the outputf
@@ -347,10 +348,11 @@ class DWI_VB_RepHoldOut_DualSVM_FeatureSelectionNested(MLWorkflow):
         self._balanced = balanced
         self._c_range = c_range # the hyperparameteWr to tune
         self._splits_indices = splits_indices
+        self._caps_reg_method = caps_reg_method
         self._top_k = top_k
         self._feature_selection_method= feature_selection_method
 
-        self._input = DWIVoxelBasedInput(caps_directory, subjects_visits_tsv, diagnoses_tsv, dwi_map, tissue_type, threshold, fwhm)
+        self._input = DWIVoxelBasedInput(caps_directory, subjects_visits_tsv, diagnoses_tsv, dwi_map, tissue_type, threshold, fwhm, self._caps_reg_method)
         self._validation = None
         self._algorithm = None
 

@@ -1,4 +1,4 @@
-from subjects_lists.subject_lists import create_subjects_lists
+from subject_lists import create_subjects_lists
 
 dwi_bids = 'PATH/TO/BIDS/DWI'
 t1w_bids = 'PATH/TO/BIDS/T1'

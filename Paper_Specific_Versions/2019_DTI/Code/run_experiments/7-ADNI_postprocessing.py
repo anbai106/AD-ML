@@ -1,6 +1,6 @@
 ### Run postprocessing of images
 ## for diffusion MRI
-from clinica_ml_dwi.dwi_postprocessing_dti import dwi_postprocessing_dti
+from dwi_postprocessing_dti import dwi_postprocessing_dti
 
 CAPS= 'CAPS_DIR'
 tsv= 'SUBJECTS_DIR/participant_tsv_file'

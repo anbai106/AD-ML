@@ -140,7 +140,7 @@ class DWIRegionInput(CAPSInput):
 
 class DWIVoxelBasedInput(CAPSInput):
     def __init__(self, caps_directory, subjects_visits_tsv, diagnoses_tsv, dwi_map, tissue_type, threshold, fwhm=None, mask_zeros=True,
-                 precomputed_kernel=None):
+                 precomputed_kernel=None, caps_reg_method='single_modal'):
         """
         This is a class to grab the outputs from CAPS for DWIVoxel based analysis
         :param caps_directory:
@@ -163,6 +163,7 @@ class DWIVoxelBasedInput(CAPSInput):
         self._tissue_type = tissue_type
         self._threshold = threshold
         self._fwhm = fwhm
+        self._caps_reg_method = caps_reg_method
 
         if dwi_map not in ['fa', 'md', 'rd', 'ad']:
             raise Exception("Incorrect DWI map name. It must be one of the values 'fa', 'md', 'rd', 'ad'")
@@ -181,7 +182,7 @@ class DWIVoxelBasedInput(CAPSInput):
 
         ### to grab the masked image
         self._images = [path.join(self._caps_directory, 'subjects', self._subjects[i], self._sessions[i],
-                                  'dwi/postprocessing', '%s_%s_acq-axial_dwi_space-MNI152Lin_res-1x1x1_com-%s_fwhm-%s_threshold-%s_%s.nii.gz'
+                                  'dwi/postprocessing_' + self._caps_reg_method, '%s_%s_acq-axial_dwi_space-MNI152Lin_res-1x1x1_com-%s_fwhm-%s_threshold-%s_%s.nii.gz'
                                   % (self._subjects[i], self._sessions[i], self._tissue_type, str(self._fwhm), str(self._threshold), (self._dwi_map).upper()))
                         for i in range(len(self._subjects))]
 
