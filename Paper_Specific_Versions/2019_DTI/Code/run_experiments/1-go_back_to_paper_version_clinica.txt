@@ -1,0 +1,2 @@
+For clinica old version on gitlab: git checkout a27de358cd4546ad59595d3c565afd3e9b8524a0 (going back to the specific version based on the hash of the old version of clinica, you should run 'pip install .' in the source folder of the clinica repository)
+For clinica new version on github: git checkout 0bb46b3b8badfacd1632cf0270b096eb270629d1 (for new version of clinica, please follow the in)

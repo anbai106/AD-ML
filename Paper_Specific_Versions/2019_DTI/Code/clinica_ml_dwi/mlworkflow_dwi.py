@@ -130,7 +130,7 @@ class DWI_RB_RepHoldOut_DualSVM_FeatureSelectionNested(MLWorkflow):
 
         self._validation.save_results(self._output_dir)
 
-class T1_RB_RepHoldOut_DualSVM_FeatureSelectionNested(MLWorkflow):##TODO, not correct
+class T1_RB_RepHoldOut_DualSVM_FeatureSelectionNested(MLWorkflow):
 
     def __init__(self, caps_directory, subjects_visits_tsv, diagnoses_tsv, group_id, image_type,  atlas,
                  output_dir, pvc=None, n_threads=15, n_iterations=100, test_size=0.3,
@@ -172,7 +172,7 @@ class T1_RB_RepHoldOut_DualSVM_FeatureSelectionNested(MLWorkflow):##TODO, not co
 
         self._validation = validation_dwi.RepeatedHoldOutFeautureSelection(self._algorithm, n_iterations=self._n_iterations, test_size=self._test_size)
 
-        classifier, best_params, results = self._validation.validate(y, n_threads=self._n_threads, splits_indices=self._splits_indices, top_k=self._top_k )
+        classifier, best_params, results = self._validation.validate(y, n_threads=self._n_threads, splits_indices=self._splits_indices, top_k=self._top_k)
         classifier_dir = path.join(self._output_dir, 'classifier')
         if not path.exists(classifier_dir):
             os.makedirs(classifier_dir)
@@ -388,7 +388,7 @@ class DWI_VB_RepHoldOut_DualSVM_FeatureSelectionNested(MLWorkflow):
 
         self._validation.save_results(self._output_dir)
 
-class T1_VB_RepHoldOut_DualSVM_FeatureSelectionNested(MLWorkflow): ##TODO, not correct
+class T1_VB_RepHoldOut_DualSVM_FeatureSelectionNested(MLWorkflow):
     """
     This is a class for TI voxel based features classification. Here, we performed the nested feature rescaling
     """
@@ -428,7 +428,7 @@ class T1_VB_RepHoldOut_DualSVM_FeatureSelectionNested(MLWorkflow): ##TODO, not c
                                                      balanced=self._balanced,
                                                      grid_search_folds=self._grid_search_folds,
                                                      c_range=self._c_range,
-                                                     n_threads=self._n_threads, feature_selection_method=self._feature_selection_method)
+                                                     n_threads=self._n_threads, feature_selection_method=self._feature_selection_method, with_std=False)
 
         self._validation = validation_dwi.RepeatedHoldOutFeautureSelection(self._algorithm, n_iterations=self._n_iterations, test_size=self._test_size)
 

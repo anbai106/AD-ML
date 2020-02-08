@@ -326,7 +326,7 @@ def run_dwi_roi_with_feature_rescaling(caps_directory, diagnoses_tsv, subjects_v
 #############################
 # T1 voxel-wise with feature rescaling
 #############################
-def run_t1_voxel_with_feature_rescaling(caps_directory, diagnoses_tsv, subjects_visits_tsv, output_dir, task, n_threads, n_iterations, test_size, grid_search_folds, fwhm=[8], group_id='ADNIbl'):
+def run_t1_voxel_with_feature_rescaling(caps_directory, diagnoses_tsv, subjects_visits_tsv, output_dir, task, n_threads, n_iterations, test_size, grid_search_folds, fwhm=[8], group_id='ADNIbl', feature_rescaling_method='zscore'):
     """
     This is to run voxel-wise classification for T1 or DTI
     Args:
@@ -359,7 +359,7 @@ def run_t1_voxel_with_feature_rescaling(caps_directory, diagnoses_tsv, subjects_
     splits_indices, splits_indices_pickle = split_subjects_to_pickle(diagnoses_tsv, n_iterations=n_iterations,
                                                                      test_size=test_size)
 
-    print("Original experiments for voxel-wise T1 experiments with feature rescaling!!!")
+    print("Experiments for voxel-wise T1 experiments with feature rescaling!!!")
 
     for k in fwhm:
         classification_dir = path.join(output_dir, 'T1WithFeatureRescalingVoxel',
@@ -375,7 +375,7 @@ def run_t1_voxel_with_feature_rescaling(caps_directory, diagnoses_tsv, subjects_
                                                                  n_iterations=n_iterations,
                                                                  test_size=test_size, splits_indices=splits_indices,
                                                                  grid_search_folds=grid_search_folds,
-                                                                 feature_selection_method='zscore')
+                                                                 feature_selection_method=feature_rescaling_method)
 
             wf.run()
         else:

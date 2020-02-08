@@ -10,9 +10,7 @@ from os import path
 import json
 from multiprocessing.pool import ThreadPool
 import datetime
-
 import numpy as np
-
 import pandas as pd
 from sklearn.svm import SVC, SVR
 from sklearn.linear_model import LogisticRegression
@@ -25,7 +23,8 @@ from sklearn.feature_selection import SelectKBest, f_classif, RFE, SelectPercent
 from clinica.pipelines.machine_learning import base
 import clinica.pipelines.machine_learning.svm_utils as utils
 from sklearn.decomposition import PCA
-from sklearn.preprocessing import StandardScaler
+from sklearn.preprocessing import StandardScaler, MinMaxScaler
+from mlworkflow_dwi_utils import normalization_per_feature
 
 
 class DualSVMAlgorithm(base.MLAlgorithm):
@@ -177,7 +176,7 @@ class DualSVMAlgorithm(base.MLAlgorithm):
 
 class DualSVMAlgorithmFeatureSelection(base.MLAlgorithm):
 
-    def __init__(self, x, y, balanced=True, grid_search_folds=10, c_range=np.logspace(-6, 2, 17), n_threads=15, feature_selection_method=None):
+    def __init__(self, x, y, balanced=True, grid_search_folds=10, c_range=np.logspace(-6, 2, 17), n_threads=15, feature_selection_method=None, with_std=True):
         # self._kernel = kernel
         self._x = x
         self._y = y
@@ -186,6 +185,7 @@ class DualSVMAlgorithmFeatureSelection(base.MLAlgorithm):
         self._c_range = c_range
         self._n_threads = n_threads
         self._feature_selection_method = feature_selection_method
+        self._with_std = with_std
 
     def _launch_svc(self, kernel_train, x_test, y_train, y_test, c):
 
@@ -254,14 +254,17 @@ class DualSVMAlgorithmFeatureSelection(base.MLAlgorithm):
             selector = RFE(estimator=svc, n_features_to_select=int(0.01 * top_k * self._x[train_index].shape[1]), step=0.5)
             selector.fit(self._x[train_index], self._y[train_index])
         elif self._feature_selection_method == 'zscore':
-            selector = StandardScaler()
-            selector.fit(self._x[train_index], self._y[train_index])
+            selector = StandardScaler(with_std=self._with_std)
+            selector.fit(self._x[train_index])
+            # x_after_fs = normalization_per_feature(self._x, train_index, method='zscore')
+        elif self._feature_selection_method == 'minmax':
+            selector = MinMaxScaler()
+            selector.fit(self._x[train_index])
+            # x_after_fs = normalization_per_feature(self._x, train_index, method='minmax')
         else:
-            print('Method has not been implemented')
+            raise Exception('Method has not been implemented')
 
         x_after_fs = selector.transform(self._x)
-        #indices_fs_train = selector.get_support()
-        #x_after_fs = self._x[:, indices_fs_train]
         print 'In total, there are %d voxels in this task' % self._x[train_index].shape[1]
         print 'The threshold is %s' % str(top_k)
         print 'We select the %d most discriminative voxels' % x_after_fs.shape[1]
@@ -718,7 +721,7 @@ class RandomForest(base.MLAlgorithm):
             elif isinstance(result_feat, float):
                 max_features = result_feat
             else:
-                raise "Unknown max_features type"
+                raise Exception("Unknown max_features type")
 
             max_feat.append(max_features)
         best_max_features = np.mean(max_feat)
