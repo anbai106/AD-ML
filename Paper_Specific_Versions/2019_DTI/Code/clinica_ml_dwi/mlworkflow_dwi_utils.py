@@ -1099,7 +1099,7 @@ def random_donsample_subjects(diagnoses_tsv, n=None):
 
     return list_subjects, list_sessions, list_diagnoses
 
-def split_subjects_to_pickle(diagnoses_tsv, n_iterations=250, test_size=0.2, balanced = False):
+def split_subjects_to_pickle(diagnoses_tsv, n_iterations=250, test_size=0.2, balanced=False):
 
     from os import path
     import pandas as pd

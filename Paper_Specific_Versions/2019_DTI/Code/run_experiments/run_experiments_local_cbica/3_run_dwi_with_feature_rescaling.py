@@ -1,7 +1,7 @@
 from run_experiments import run_dwi_voxel_with_feature_rescaling, run_dwi_roi_with_feature_rescaling
 
 # ########################
-# ### Original classification
+# ### Classification with feature rescaling
 # ########################
 
 caps_directory= '/run/user/1000/gvfs/sftp:host=cbica-cluster,user=wenju/cbica/home/wenju/Dataset/Neuroinformatics_CAPS/CAPS_DWI'
