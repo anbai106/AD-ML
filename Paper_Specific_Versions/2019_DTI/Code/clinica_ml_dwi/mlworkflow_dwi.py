@@ -26,7 +26,6 @@ class DWI_RB_RepHoldOut_DualSVM(MLWorkflow):
     def __init__(self, caps_directory, subjects_visits_tsv, diagnoses_tsv, atlas, dwi_map,
                  output_dir, n_threads=15, n_iterations=100, test_size=0.3,
                  grid_search_folds=10, balanced=True, c_range=np.logspace(-6, 2, 17), splits_indices=None):
-        ## TODO, the parameter balanced here by default is True, I changed it to False just for DTI paper.
 
         self._output_dir = output_dir # DTI_SVM folder to contain the outputf
         self._n_threads = n_threads # number of threds is to use
@@ -80,7 +79,7 @@ class DWI_RB_RepHoldOut_DualSVM_FeatureSelectionNested(MLWorkflow):
 
     def __init__(self, caps_directory, subjects_visits_tsv, diagnoses_tsv, atlas, dwi_map,
                  output_dir, n_threads=15, n_iterations=100, test_size=0.3,
-                 grid_search_folds=10, balanced=True, c_range=np.logspace(-6, 2, 17), splits_indices=None, feature_selection_method='zscore'):
+                 grid_search_folds=10, balanced=True, c_range=np.logspace(-6, 2, 17), splits_indices=None, feature_rescaling_method='zscore'):
 
         self._output_dir = output_dir # DTI_SVM folder to contain the outputf
         self._n_threads = n_threads # number of threds is to use
@@ -90,7 +89,7 @@ class DWI_RB_RepHoldOut_DualSVM_FeatureSelectionNested(MLWorkflow):
         self._balanced = balanced
         self._c_range = c_range # the hyperparameter to tune
         self._splits_indices = splits_indices
-        self._feature_selection_method = feature_selection_method
+        self._feature_rescaling_method = feature_rescaling_method
 
         self._input = DWIRegionInput(caps_directory, subjects_visits_tsv, diagnoses_tsv, atlas, dwi_map)
         self._validation = None
@@ -113,7 +112,7 @@ class DWI_RB_RepHoldOut_DualSVM_FeatureSelectionNested(MLWorkflow):
                                                      balanced=self._balanced,
                                                      grid_search_folds=self._grid_search_folds,
                                                      c_range=self._c_range,
-                                                     n_threads=self._n_threads, feature_selection_method=self._feature_selection_method)
+                                                     n_threads=self._n_threads, feature_rescaling_method=self._feature_rescaling_method)
 
         ### choose the validation method used, returning a class object
         self._validation = validation_dwi.RepeatedHoldOutFeautureSelection(self._algorithm, n_iterations=self._n_iterations, test_size=self._test_size)
@@ -135,7 +134,7 @@ class T1_RB_RepHoldOut_DualSVM_FeatureSelectionNested(MLWorkflow):
     def __init__(self, caps_directory, subjects_visits_tsv, diagnoses_tsv, group_id, image_type,  atlas,
                  output_dir, pvc=None, n_threads=15, n_iterations=100, test_size=0.3,
                  grid_search_folds=10, balanced=True, c_range=np.logspace(-6, 2, 17), splits_indices=None,
-                 feature_selection_method='zscore', top_k=50):
+                 feature_rescaling_method='zscore', top_k=50):
         self._output_dir = output_dir
         self._n_threads = n_threads
         self._n_iterations = n_iterations
@@ -144,7 +143,7 @@ class T1_RB_RepHoldOut_DualSVM_FeatureSelectionNested(MLWorkflow):
         self._balanced = balanced
         self._c_range = c_range
         self._splits_indices = splits_indices
-        self._feature_selection_method = feature_selection_method
+        self._feature_rescaling_method = feature_rescaling_method
         self._top_k = top_k
 
         self._input = input.CAPSRegionBasedInput(caps_directory, subjects_visits_tsv, diagnoses_tsv, group_id,
@@ -168,7 +167,7 @@ class T1_RB_RepHoldOut_DualSVM_FeatureSelectionNested(MLWorkflow):
                                                      balanced=self._balanced,
                                                      grid_search_folds=self._grid_search_folds,
                                                      c_range=self._c_range,
-                                                     n_threads=self._n_threads, feature_selection_method=self._feature_selection_method)
+                                                     n_threads=self._n_threads, feature_rescaling_method=self._feature_rescaling_method)
 
         self._validation = validation_dwi.RepeatedHoldOutFeautureSelection(self._algorithm, n_iterations=self._n_iterations, test_size=self._test_size)
 
@@ -194,7 +193,6 @@ class DWI_VB_RepHoldOut_DualSVM(MLWorkflow):
     def __init__(self, caps_directory, subjects_visits_tsv, diagnoses_tsv, dwi_map, tissue_type, threshold, output_dir, fwhm=None,
                  n_threads=15, n_iterations=100, test_size=0.3,
                  grid_search_folds=10, balanced=True, c_range=np.logspace(-6, 2, 17), splits_indices=None, caps_reg_method='single_modal'):
-        ## TODO, the parameter balanced here by default is True, I changed it to False just for DTI paper.
 
         self._output_dir = output_dir # DTI_SVM folder to contain the outputf
         self._n_threads = n_threads # number of threds is to use
@@ -251,7 +249,6 @@ class DWI_VB_RepHoldOut_DualSVM_FeatureSelectionNonNested(MLWorkflow):
     def __init__(self, caps_directory, subjects_visits_tsv, diagnoses_tsv, dwi_map, tissue_type, threshold, output_dir, fwhm=None,
                  n_threads=15, n_iterations=100, test_size=0.3,
                  grid_search_folds=10, balanced=True, c_range=np.logspace(-6, 2, 17), splits_indices=None, top_k=50, feature_selection_method=None):
-        ## TODO, the parameter balanced here by default is True, I changed it to False just for DTI paper.
 
         self._output_dir = output_dir # DTI_SVM folder to contain the outputf
         self._n_threads = n_threads # number of threds is to use
@@ -338,7 +335,7 @@ class DWI_VB_RepHoldOut_DualSVM_FeatureSelectionNested(MLWorkflow):
     def __init__(self, caps_directory, subjects_visits_tsv, diagnoses_tsv, dwi_map, tissue_type, threshold, output_dir, fwhm=None,
                  n_threads=15, n_iterations=100, test_size=0.3,
                  grid_search_folds=10, balanced=True, c_range=np.logspace(-6, 2, 17), splits_indices=None, caps_reg_method='single_modal', top_k=50,
-                 feature_selection_method=None):
+                 feature_selection_method=None, feature_rescaling_method=None):
 
         self._output_dir = output_dir # DTI_SVM folder to contain the outputf
         self._n_threads = n_threads # number of threds is to use
@@ -351,6 +348,7 @@ class DWI_VB_RepHoldOut_DualSVM_FeatureSelectionNested(MLWorkflow):
         self._caps_reg_method = caps_reg_method
         self._top_k = top_k
         self._feature_selection_method= feature_selection_method
+        self._feature_rescaling_method= feature_rescaling_method
 
         self._input = DWIVoxelBasedInput(caps_directory, subjects_visits_tsv, diagnoses_tsv, dwi_map, tissue_type, threshold, fwhm, self._caps_reg_method)
         self._validation = None
@@ -372,7 +370,8 @@ class DWI_VB_RepHoldOut_DualSVM_FeatureSelectionNested(MLWorkflow):
                                                      grid_search_folds=self._grid_search_folds,
                                                      c_range=self._c_range,
                                                      n_threads=self._n_threads,
-                                                     feature_selection_method=self._feature_selection_method)
+                                                     feature_selection_method=self._feature_selection_method,
+                                                     feature_rescaling_method=self._feature_rescaling_method)
 
         self._validation = validation_dwi.RepeatedHoldOutFeautureSelection(self._algorithm, n_iterations=self._n_iterations, test_size=self._test_size)
         classifier, best_params, results = self._validation.validate(y, n_threads=self._n_threads, splits_indices=self._splits_indices, top_k=self._top_k)
@@ -396,7 +395,7 @@ class T1_VB_RepHoldOut_DualSVM_FeatureSelectionNested(MLWorkflow):
     def __init__(self, caps_directory, subjects_visits_tsv, diagnoses_tsv, group_id, image_type, output_dir, fwhm=0,
                  modulated="on", pvc=None, precomputed_kernel=None, mask_zeros=True, n_threads=15, n_iterations=100,
                  test_size=0.3, grid_search_folds=10, balanced=True, c_range=np.logspace(-6, 2, 17), splits_indices=None,
-                 feature_selection_method='zscore', top_k=50):
+                 feature_rescaling_method='zscore', top_k=50):
         self._output_dir = output_dir
         self._n_threads = n_threads
         self._n_iterations = n_iterations
@@ -405,7 +404,7 @@ class T1_VB_RepHoldOut_DualSVM_FeatureSelectionNested(MLWorkflow):
         self._balanced = balanced
         self._c_range = c_range
         self._splits_indices = splits_indices
-        self._feature_selection_method = feature_selection_method
+        self._feature_rescaling_method = feature_rescaling_method
         self._top_k = top_k
 
         self._input = input.CAPSVoxelBasedInput(caps_directory, subjects_visits_tsv, diagnoses_tsv, group_id,
@@ -428,7 +427,7 @@ class T1_VB_RepHoldOut_DualSVM_FeatureSelectionNested(MLWorkflow):
                                                      balanced=self._balanced,
                                                      grid_search_folds=self._grid_search_folds,
                                                      c_range=self._c_range,
-                                                     n_threads=self._n_threads, feature_selection_method=self._feature_selection_method, with_std=False)
+                                                     n_threads=self._n_threads, feature_rescaling_method=self._feature_rescaling_method, with_std=False)
 
         self._validation = validation_dwi.RepeatedHoldOutFeautureSelection(self._algorithm, n_iterations=self._n_iterations, test_size=self._test_size)
 

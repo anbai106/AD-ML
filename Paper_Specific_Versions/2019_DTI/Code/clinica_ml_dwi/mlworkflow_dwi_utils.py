@@ -14,37 +14,6 @@ import matplotlib.pyplot as plt
 import pandas as pd
 from scipy import stats
 
-
-def normalization_per_feature(X, train_index, method='zscore'):
-    """
-    This is to do zscore feature normalization per feature independently x - mean / std, trained on training
-    set and applied to test set
-    Args:
-        X:
-        train_index:
-        test_index:
-        method: zscore or minmax
-
-    Returns:
-
-    """
-    if method == 'zscore':
-        mean_per_feature = X[train_index].mean(axis=0)
-        std_per_feature = X[train_index].std(axis=0)
-        X_transformed = np.divide((X - mean_per_feature), std_per_feature)
-    elif method == 'minmax':
-        min_per_feature = X[train_index].min(axis=0)
-        max_per_feature = X[train_index].max(axis=0)
-        X_transformed = np.divide((X - min_per_feature), (max_per_feature - min_per_feature))
-    else:
-        raise Exception('Methods not implemented yet!')
-
-    X_transformed = np.where(np.isnan(X_transformed), 0, X_transformed)
-    X_transformed[np.isneginf(X_transformed)] = 0
-    X_transformed[np.isinf(X_transformed)] = 0
-
-    return X_transformed
-
 def classification_performances_violin_plot(classification_result_path, tasks_imbalanced, tasks_balanced,
                                                                          n_iterations, raw_classification=True, feature_type='voxel', modality='dwi', figure_number=0):
     """

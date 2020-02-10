@@ -264,7 +264,7 @@ def run_dwi_voxel_with_feature_rescaling(caps_directory, diagnoses_tsv, subjects
                                                                                   test_size=test_size,
                                                                                   grid_search_folds=grid_search_folds,
                                                                                   splits_indices=splits_indices, caps_reg_method=caps_reg_method,
-                                                                                  feature_selection_method='zscore')
+                                                                                  feature_rescaling_method='zscore')
 
                             wf.run()
                         else:
@@ -302,7 +302,7 @@ def run_dwi_voxel_with_feature_rescaling(caps_directory, diagnoses_tsv, subjects
                                                                                   test_size=test_size,
                                                                                   grid_search_folds=grid_search_folds,
                                                                                   splits_indices=splits_indices, caps_reg_method=caps_reg_method,
-                                                                                  feature_selection_method='zscore', balanced=balance_sklearn)
+                                                                                  feature_rescaling_method='zscore', balanced=balance_sklearn)
 
                             wf.run()
                         else:
@@ -357,7 +357,7 @@ def run_dwi_roi_with_feature_rescaling(caps_directory, diagnoses_tsv, subjects_v
                                                                           test_size=test_size,
                                                                           grid_search_folds=grid_search_folds,
                                                                           splits_indices=splits_indices,
-                                                                          feature_selection_method='zscore')
+                                                                          feature_rescaling_method='zscore')
                     wf.run()
                 else:
                     print("This combination has been classified, just skip: %s " % classification_dir)
@@ -390,7 +390,7 @@ def run_dwi_roi_with_feature_rescaling(caps_directory, diagnoses_tsv, subjects_v
                                                                           test_size=test_size,
                                                                           grid_search_folds=grid_search_folds,
                                                                           splits_indices=splits_indices,
-                                                                          feature_selection_method='zscore', balanced=balance_sklearn)
+                                                                          feature_rescaling_method='zscore', balanced=balance_sklearn)
                     wf.run()
                 else:
                     print("This combination has been classified, just skip: %s " % classification_dir)
@@ -422,7 +422,7 @@ def run_t1_voxel_with_feature_rescaling(caps_directory, diagnoses_tsv, subjects_
         feature_selection_nested: if feature selection should be done. None means no feature selection is done. False
         for non-nested feature selection; True for nested feature selection
         top_k:
-        feature_selection_method: By default 'ANOVA'. Other options are RF, PCA, RFE
+        feature_rescaling_method: zscore or minmax
 
     Returns:
 
@@ -447,7 +447,7 @@ def run_t1_voxel_with_feature_rescaling(caps_directory, diagnoses_tsv, subjects_
                                                                  n_iterations=n_iterations,
                                                                  test_size=test_size, splits_indices=splits_indices,
                                                                  grid_search_folds=grid_search_folds,
-                                                                 feature_selection_method=feature_rescaling_method)
+                                                                 feature_rescaling_method=feature_rescaling_method)
 
             wf.run()
         else:
@@ -493,334 +493,106 @@ def run_t1_roi_with_feature_rescaling(caps_directory, diagnoses_tsv, subjects_vi
                                                             n_iterations=n_iterations,
                                                             test_size=test_size, splits_indices=splits_indices,
                                                             grid_search_folds=grid_search_folds,
-                                                            feature_selection_method='zscore')
+                                                            feature_rescaling_method='zscore')
 
             wf.run()
         else:
             print("This combination has been classified, just skip: %s " % classification_dir)
 
+#############################
+# DWI voxel-wise with feature selection
+#############################
 
+def run_dwi_voxel_with_feature_selection(caps_directory, diagnoses_tsv, subjects_visits_tsv, output_dir, task, n_threads, n_iterations, test_size, grid_search_folds, dwi_maps=['fa', 'md'], fwhm=[8],
+                                   tissue_type=['WM', 'GM', 'GM_WM'], threshold=[0.3], caps_reg_method='single_modal', feature_rescaling_method='zscore',
+                                   feature_selection_nested=True, feature_selection_method='RFE', top_k=[50]):
+    """
+    This is to run voxel-wise classification for DTI with different feature selection procedures:
+    1) nested feature selection
+    2) non-nested feature selection
+    Args:
+        caps_directory:
+        diagnoses_tsv:
+        subjects_visits_tsv:
+        output_dir:
+        task:
+        n_threads:
+        n_iterations:
+        test_size:
+        grid_search_folds:
+        dwi_maps:
+        fwhm:
+        tissue_type:
+        threshold:
+        group_id:
+        caps_reg_method: single_modal or multi_modal
+        balanced_down_sample: if random balance the sample size, by default: False
+        feature_selection_nested: nested feature selection, by default True
+        feature_selection_method: one of 'ANOVA' and 'RFE'
 
+    Returns:
 
+    """
 
+    if feature_selection_nested:
+        print("Classification with nested feature selection!\n")
+        splits_indices, splits_indices_pickle = split_subjects_to_pickle(diagnoses_tsv, n_iterations=n_iterations, test_size=test_size)
+        for dwi_map in dwi_maps:
+            for i in tissue_type:
+                for j in threshold:
+                    for k in fwhm:
+                        for l in top_k:
+                            classification_dir = path.join(output_dir, 'DWIWithFeatureRescalingVoxelNestedFS' + feature_selection_method,
+                                                           task + '_' + i + '_' + str(j) + '_' + str(
+                                                               k) + '_fs_' + str(l) + '_' + dwi_map)
+                            if not path.exists(classification_dir):
+                                os.makedirs(classification_dir)
 
+                                print("\nRunning %s" % classification_dir)
 
+                                wf = DWI_VB_RepHoldOut_DualSVM_FeatureSelectionNested(caps_directory, subjects_visits_tsv,
+                                                                                      diagnoses_tsv, dwi_map,
+                                                                                      i, j, classification_dir, fwhm=k,
+                                                                                      n_threads=n_threads,
+                                                                                      n_iterations=n_iterations,
+                                                                                      test_size=test_size,
+                                                                                      grid_search_folds=grid_search_folds,
+                                                                                      splits_indices=splits_indices, caps_reg_method=caps_reg_method,
+                                                                                      feature_selection_method=feature_selection_method,
+                                                                                      feature_rescaling_method=feature_rescaling_method,
+                                                                                      top_k=l)
 
+                                wf.run()
+                            else:
+                                print("This combination has been classified, just skip: %s " % classification_dir)
 
+    else:
+        print("Classification with non-nested feature selection\n")
+        splits_indices, splits_indices_pickle = split_subjects_to_pickle(diagnoses_tsv, n_iterations=n_iterations, test_size=test_size)
+        for dwi_map in dwi_maps:
+            for i in tissue_type:
+                for j in threshold:
+                    for k in fwhm:
+                        for l in top_k:
+                            classification_dir = path.join(output_dir, 'DWIWithFeatureRescalingVoxelNonNestedFS' + feature_selection_method,
+                                                           task + '_' + i + '_' + str(j) + '_' + str(
+                                                               k) + '_fs_' + str(l) + '_' + dwi_map)
 
+                            if not path.exists(classification_dir):
+                                os.makedirs(classification_dir)
 
+                                print("\nRunning %s" % classification_dir)
 
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-# ##########################
-# # TO DELETE
-# #############################
-# def run_voxel_based_classification(caps_directory, diagnoses_tsv, subjects_visits_tsv, output_dir, task, n_threads, n_iterations, test_size, grid_search_folds,
-#                                    balanced_down_sample=False, modality='dwi', dwi_maps=['fa', 'md'], fwhm=[8],
-#                                    tissue_type=['WM', 'GM', 'GM_WM'], threshold=[0.3], group_id='ADNIbl', feature_rescaling=False, feature_selection_nested=None, top_k=[50], feature_selection_method='ANOVA'):
-#     """
-#     This is to run voxel-wise classification for T1 or DTI
-#     Args:
-#         caps_directory:
-#         diagnoses_tsv:
-#         subjects_visits_tsv:
-#         output_dir:
-#         task:
-#         n_threads:
-#         n_iterations:
-#         test_size:
-#         grid_search_folds:
-#         balanced_down_sample:
-#         modality:
-#         dwi_maps:
-#         fwhm:
-#         tissue_type:
-#         threshold:
-#         group_id:
-#         feature_rescaling: if feature rescaling is performed, by default no.
-#         feature_selection_nested: if feature selection should be done. None means no feature selection is done. False
-#         for non-nested feature selection; True for nested feature selection
-#         top_k:
-#         feature_selection_method: By default 'ANOVA'. Other options are RF, PCA, RFE
-#
-#     Returns:
-#
-#     """
-#
-#     splits_indices, splits_indices_pickle = split_subjects_to_pickle(diagnoses_tsv, n_iterations=n_iterations,
-#                                                                      test_size=test_size, balanced=balanced_down_sample)
-#
-#     if modality == 'dwi':
-#         # ## run the balaned trick classification
-#         if balanced_down_sample: ###
-#             print("Random balanced experiments for voxel-wise DWI experiments, make sure the original experiments balance trick in sklearn should be off!")
-#             for dwi_map in dwi_maps:
-#                 for i in tissue_type:
-#                     for j in threshold:
-#                         for k in fwhm:
-#                             classification_dir = path.join(output_dir, 'RandomBalanced',
-#                                                            task + '_' + i + '_' + str(j) + '_' + str(k),
-#                                                            dwi_map)
-#                             if not path.exists(classification_dir):
-#                                 os.makedirs(classification_dir)
-#
-#                                 print "\nRunning %s" % classification_dir
-#
-#                                 wf = DWI_VB_RepHoldOut_DualSVM(caps_directory, subjects_visits_tsv, diagnoses_tsv, dwi_map,
-#                                                                i, j, classification_dir, fwhm=k,
-#                                                                n_threads=n_threads, n_iterations=n_iterations, test_size=test_size,
-#                                                                grid_search_folds=grid_search_folds, splits_indices=splits_indices)
-#                                 wf.run()
-#                             else:
-#                                 print("This combination has been classified, just skip: %s " % classification_dir)
-#
-#
-#         else: ## run the original classifcation
-#             print("Original experiments voxel-wise DWI experiments!")
-#             for dwi_map in dwi_maps:
-#                 for i in tissue_type:
-#                     for j in threshold:
-#                         for k in fwhm:
-#                             for l in top_k:
-#                                 if feature_selection_nested == None: ## no feature selection was performed
-#                                     classification_dir = path.join(output_dir,
-#                                                                    task + '_' + i + '_' + str(j) + '_' + str(
-#                                                                        k) + '_' + dwi_map)
-#                                 else:
-#                                     classification_dir = path.join(output_dir,
-#                                                                    task + '_' + i + '_' + str(j) + '_' + str(k) + '_fs_' + str(l),
-#                                                                    dwi_map)
-#                                 if not path.exists(classification_dir):
-#                                     os.makedirs(classification_dir)
-#
-#                                     print("\nRunning %s" % classification_dir)
-#                                     if feature_selection_nested == None:
-#                                         print 'Original data classification without any feature selection!!!'
-#                                         wf = DWI_VB_RepHoldOut_DualSVM(caps_directory, subjects_visits_tsv, diagnoses_tsv, dwi_map,
-#                                                                        i, j, classification_dir, fwhm=k,
-#                                                                        n_threads=n_threads, n_iterations=n_iterations,
-#                                                                        test_size=test_size,
-#                                                                        grid_search_folds=grid_search_folds, splits_indices=splits_indices)
-#                                     elif feature_selection_nested == False:
-#                                         print 'Original data classification with NON-NESTED feature selection!!!'
-#                                         wf = DWI_VB_RepHoldOut_DualSVM_FeatureSelectionNonNested(caps_directory,
-#                                                                                         subjects_visits_tsv,
-#                                                                                         diagnoses_tsv, dwi_map,
-#                                                                                         i, j, classification_dir,
-#                                                                                         fwhm=k,
-#                                                                                         n_threads=n_threads,
-#                                                                                         n_iterations=n_iterations,
-#                                                                                         test_size=test_size,
-#                                                                                         grid_search_folds=grid_search_folds,
-#                                                                                         splits_indices=splits_indices,
-#                                                                                         top_k=l, feature_selection_method=feature_selection_method)
-#
-#
-#                                     elif feature_selection_nested == True:
-#                                         print 'Original data classification with NESTED feature selection!!!'
-#                                         wf = DWI_VB_RepHoldOut_DualSVM_FeatureSelectionNested(caps_directory, subjects_visits_tsv, diagnoses_tsv, dwi_map,
-#                                                                        i, j, classification_dir, fwhm=k,
-#                                                                        n_threads=n_threads, n_iterations=n_iterations,
-#                                                                        test_size=test_size,
-#                                                                        grid_search_folds=grid_search_folds, splits_indices=splits_indices, top_k=l, feature_selection_method=feature_selection_method)
-#                                     wf.run()
-#                                 else:
-#                                     print("This combination has been classified, just skip: %s " % classification_dir)
-#
-#     elif modality == 'T1': ## Run T1 classification
-#         if balanced_down_sample: ###
-#             print("Random balanced experiments for voxel-wise T1 experiments, make sure the original experiments balance trick in sklearn should be off!")
-#             for k in fwhm:
-#                 classification_dir = path.join(output_dir, 'RandomBalanced',
-#                                                task + '_fwhm_' + str(k))
-#                 if not path.exists(classification_dir):
-#                     os.makedirs(classification_dir)
-#
-#                     print("\nRunning %s" % classification_dir)
-#
-#                     wf = VB_RepHoldOut_DualSVM(caps_directory, subjects_visits_tsv, diagnoses_tsv, group_id, modality,
-#                                                classification_dir, fwhm=k, n_threads=n_threads, n_iterations=n_iterations,
-#                                                test_size=test_size, splits_indices=splits_indices)
-#
-#                     wf.run()
-#                 else:
-#                     print("This combination has been classified, just skip: %s " % classification_dir)
-#
-#         else: ## original classifcation
-#             print("Original experiments voxel-wise T1 experiments!")
-#             #### have the same lists for all the iterations
-#             for k in fwhm:
-#                 classification_dir = path.join(output_dir,
-#                                                task + '_fwhm_' + str(k))
-#                 if not path.exists(classification_dir):
-#                     os.makedirs(classification_dir)
-#
-#                     print("\nRunning %s" % classification_dir)
-#
-#                     if feature_selection_nested == True:
-#                         print 'Original data classification with nested feature rescaling procedures!!!'
-#                         wf = T1_VB_RepHoldOut_DualSVM_FeatureSelectionNested(caps_directory, subjects_visits_tsv, diagnoses_tsv, group_id,
-#                                                    modality,
-#                                                    classification_dir, fwhm=k, n_threads=n_threads,
-#                                                    n_iterations=n_iterations,
-#                                                    test_size=test_size, splits_indices=splits_indices, feature_selection_method='zscore')
-#                     else:
-#                         wf = VB_RepHoldOut_DualSVM(caps_directory, subjects_visits_tsv, diagnoses_tsv, group_id, modality,
-#                                                    classification_dir, fwhm=k, n_threads=n_threads,
-#                                                    n_iterations=n_iterations,
-#                                                    test_size=test_size, splits_indices=splits_indices)
-#                     wf.run()
-#                 else:
-#                     print("This combination has been classified, just skip: %s " % classification_dir)
-#     else:
-#         pass
-#
-#
-# def run_roi_based_classification(caps_directory, diagnoses_tsv, subjects_visits_tsv, output_dir, atlas,
-#                                 task, n_threads, n_iterations, test_size, grid_search_folds, balanced_down_sample=False,
-#                                  dwi_maps=['fa', 'md'], modality='dwi', group_id='ADNIbl', feature_selection_nested=True):
-#     """
-#     This is a function to run the Voxel-based calssification tasks_imbalanced after the imaging processing pipeline of ADNI
-#     :param caps_directory: caps directory for Clinica outputs
-#     :param diagnoses_tsv:
-#     :param subjects_visits_tsv:
-#     :param output_dir: the path to store the classification outputs
-#     :param atlas: one of these: ['JHUDTI81', 'JHUTracts0', 'JHUTracts25']
-#     :param dwi_maps: the maps based on DWI, currently, we just have maps from DTI model.
-#     :param balanced_down_sample: int, how many times to repeat for the downsampling procedures to creat the balanced data, default is 0, which means we do not force the data to be balanced
-#     :param task: the name of the task to store the classification results
-#     :param n_threads: number of cores to use for this classification
-#     :param n_iterations: number of runs for the RepHoldOut
-#     :param test_size: propotion for the testing dataset
-#     :param grid_search_folds: number of runs to search the hyperparameters
-#
-#     :return:
-#     """
-#     splits_indices, splits_indices_pickle = split_subjects_to_pickle(diagnoses_tsv, n_iterations=n_iterations,
-#                                                                      test_size=test_size, balanced=balanced_down_sample)
-#
-#     if modality == 'dwi':
-#         ## run the classification
-#         if balanced_down_sample: ###
-#             print("Using balanced data to do classifications!!!")
-#             for dwi_map in dwi_maps:
-#                 for i in atlas:
-#                             classification_dir = path.join(output_dir, 'RandomBalanced',
-#                                                            task + '_' + i,
-#                                                            dwi_map)
-#                             if not path.exists(classification_dir):
-#                                 os.makedirs(classification_dir)
-#
-#                                 print("\nRunning %s" % classification_dir)
-#                                 wf = DWI_RB_RepHoldOut_DualSVM(caps_directory, subjects_visits_tsv, diagnoses_tsv, i, dwi_map,
-#                                                            classification_dir,
-#                                                            n_threads=n_threads, n_iterations=n_iterations,
-#                                                            test_size=test_size,
-#                                                            grid_search_folds=grid_search_folds,
-#                                                                splits_indices=splits_indices)
-#                                 wf.run()
-#
-#                             else:
-#                                 print("This combination has been classified, just skip: %s " % classification_dir)
-#
-#
-#         else:
-#             print("Using raw data to do classifications!!!")
-#
-#             for dwi_map in dwi_maps:
-#                 for i in atlas:
-#                             classification_dir = path.join(output_dir,
-#                                                            task + '_' + i,
-#                                                            dwi_map)
-#                             if not path.exists(classification_dir):
-#                                 os.makedirs(classification_dir)
-#
-#                                 print("\nRunning %s" % classification_dir)
-#                                 if feature_selection_nested == False:
-#                                     print('Original data classification !!!')
-#                                     wf = DWI_RB_RepHoldOut_DualSVM(caps_directory, subjects_visits_tsv, diagnoses_tsv, i, dwi_map,
-#                                                                classification_dir,
-#                                                                n_threads=n_threads, n_iterations=n_iterations,
-#                                                                test_size=test_size,
-#                                                                grid_search_folds=grid_search_folds,
-#                                                                    splits_indices=splits_indices)
-#
-#                                 else:
-#                                     print('Original data classification with nested zscore feature resclaing procedures!!!')
-#                                     wf = DWI_RB_RepHoldOut_DualSVM_FeatureSelectionNested(caps_directory, subjects_visits_tsv, diagnoses_tsv, i,
-#                                                                    dwi_map,
-#                                                                    classification_dir,
-#                                                                    n_threads=n_threads, n_iterations=n_iterations,
-#                                                                    test_size=test_size,
-#                                                                    grid_search_folds=grid_search_folds,
-#                                                                    splits_indices=splits_indices, feature_selection_method='zscore')
-#                                 wf.run()
-#                             else:
-#                                 print("This combination has been classified, just skip: %s " % classification_dir)
-#
-#
-#     elif modality == 'T1':
-#         ## run the classification
-#         if balanced_down_sample:  ###
-#             print("Using balanced data to do classifications!!!")
-#             for i in atlas:
-#                 classification_dir = path.join(output_dir, 'RandomBalanced',
-#                                                task + '_' + i)
-#                 if not path.exists(classification_dir):
-#                     os.makedirs(classification_dir)
-#
-#                     print("\nRunning %s" % classification_dir)
-#
-#                     wf = RB_RepHoldOut_DualSVM(caps_directory, subjects_visits_tsv, diagnoses_tsv, group_id, modality, i,
-#                                                 classification_dir, n_threads=n_threads, n_iterations=n_iterations, test_size=test_size,
-#                                                splits_indices=splits_indices)
-#
-#                     wf.run()
-#                 else:
-#                     print("This combination has been classified, just skip: %s " % classification_dir)
-#
-#
-#         else:
-#             print("Using raw data to do classifications!!!")
-#             for i in atlas:
-#                 classification_dir = path.join(output_dir,
-#                                                task + '_' + i)
-#                 if not path.exists(classification_dir):
-#                     os.makedirs(classification_dir)
-#
-#                     print("\nRunning %s" % classification_dir)
-#                     if feature_selection_nested == True:
-#                         print 'Original data classification with nested feature rescaling procedures!!!'
-#                         T1_RB_RepHoldOut_DualSVM_FeatureSelectionNested(caps_directory, subjects_visits_tsv, diagnoses_tsv, group_id,
-#                                                    modality, i,
-#                                                    classification_dir, n_threads=n_threads, n_iterations=n_iterations,
-#                                                    test_size=test_size, splits_indices=splits_indices, feature_selection_method='zscore')
-#                     else:
-#                         wf = RB_RepHoldOut_DualSVM(caps_directory, subjects_visits_tsv, diagnoses_tsv, group_id,
-#                                                    modality, i,
-#                                                    classification_dir, n_threads=n_threads, n_iterations=n_iterations,
-#                                                    test_size=test_size, splits_indices=splits_indices)
-#                     wf.run()
-#                 else:
-#                     print("This combination has been classified, just skip: %s " % classification_dir)
-#
-#     else:
-#         pass
+                                wf = DWI_VB_RepHoldOut_DualSVM_FeatureSelectionNonNested(caps_directory, subjects_visits_tsv,
+                                                                                      diagnoses_tsv, dwi_map,
+                                                                                      i, j, classification_dir, fwhm=k,
+                                                                                      n_threads=n_threads,
+                                                                                      n_iterations=n_iterations,
+                                                                                      test_size=test_size,
+                                                                                      grid_search_folds=grid_search_folds,
+                                                                                      splits_indices=splits_indices,
+                                                                                      feature_selection_method=feature_selection_method,
+                                                                                      top_k=l)
+                                wf.run()
+                            else:
+                                print("This combination has been classified, just skip: %s " % classification_dir)
