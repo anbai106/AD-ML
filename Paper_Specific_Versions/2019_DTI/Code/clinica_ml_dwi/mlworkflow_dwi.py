@@ -8,7 +8,7 @@ __status__ = "Development"
 
 import os
 from os import path
-
+from sklearn.preprocessing import StandardScaler, MinMaxScaler
 import numpy as np
 import algorithm_dwi
 import validation_dwi
@@ -270,9 +270,12 @@ class DWI_VB_RepHoldOut_DualSVM_FeatureSelectionNonNested(MLWorkflow):
         x = self._input.get_x()
         y = self._input.get_y()
 
+        ### first do feature rescaling
+        selector = StandardScaler(with_std=True)
+        selector.fit(x)
+        x = selector.transform(x)
+
         ## feature selection for all the data
-        ## This is ANOVA test Univariate FS
-        ## get the training and testing data for feature selection
         if self._feature_selection_method == 'ANOVA':
             selector = SelectPercentile(f_classif, percentile=self._top_k)
             selector.fit(x, y)
@@ -395,7 +398,7 @@ class T1_VB_RepHoldOut_DualSVM_FeatureSelectionNested(MLWorkflow):
     def __init__(self, caps_directory, subjects_visits_tsv, diagnoses_tsv, group_id, image_type, output_dir, fwhm=0,
                  modulated="on", pvc=None, precomputed_kernel=None, mask_zeros=True, n_threads=15, n_iterations=100,
                  test_size=0.3, grid_search_folds=10, balanced=True, c_range=np.logspace(-6, 2, 17), splits_indices=None,
-                 feature_rescaling_method='zscore', top_k=50):
+                 feature_selection_method=None, feature_rescaling_method='zscore', top_k=50):
         self._output_dir = output_dir
         self._n_threads = n_threads
         self._n_iterations = n_iterations
@@ -405,6 +408,7 @@ class T1_VB_RepHoldOut_DualSVM_FeatureSelectionNested(MLWorkflow):
         self._c_range = c_range
         self._splits_indices = splits_indices
         self._feature_rescaling_method = feature_rescaling_method
+        self._feature_selection_method = feature_selection_method
         self._top_k = top_k
 
         self._input = input.CAPSVoxelBasedInput(caps_directory, subjects_visits_tsv, diagnoses_tsv, group_id,
@@ -427,7 +431,8 @@ class T1_VB_RepHoldOut_DualSVM_FeatureSelectionNested(MLWorkflow):
                                                      balanced=self._balanced,
                                                      grid_search_folds=self._grid_search_folds,
                                                      c_range=self._c_range,
-                                                     n_threads=self._n_threads, feature_rescaling_method=self._feature_rescaling_method, with_std=False)
+                                                     n_threads=self._n_threads, feature_rescaling_method=self._feature_rescaling_method,
+                                                     feature_selection_method=self._feature_selection_method, with_std=False)
 
         self._validation = validation_dwi.RepeatedHoldOutFeautureSelection(self._algorithm, n_iterations=self._n_iterations, test_size=self._test_size)
 
