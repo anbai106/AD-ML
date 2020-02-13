@@ -248,7 +248,8 @@ class DWI_VB_RepHoldOut_DualSVM_FeatureSelectionNonNested(MLWorkflow):
 
     def __init__(self, caps_directory, subjects_visits_tsv, diagnoses_tsv, dwi_map, tissue_type, threshold, output_dir, fwhm=None,
                  n_threads=15, n_iterations=100, test_size=0.3,
-                 grid_search_folds=10, balanced=True, c_range=np.logspace(-6, 2, 17), splits_indices=None, top_k=50, feature_selection_method=None):
+                 grid_search_folds=10, balanced=True, c_range=np.logspace(-6, 2, 17), splits_indices=None, top_k=50,
+                 feature_selection_method=None, feature_rescaling_method=None):
 
         self._output_dir = output_dir # DTI_SVM folder to contain the outputf
         self._n_threads = n_threads # number of threds is to use
@@ -260,6 +261,7 @@ class DWI_VB_RepHoldOut_DualSVM_FeatureSelectionNonNested(MLWorkflow):
         self._splits_indices = splits_indices
         self._top_k = top_k
         self._feature_selection_method = feature_selection_method
+        self._feature_rescaling_method = feature_rescaling_method
 
         self._input = DWIVoxelBasedInput(caps_directory, subjects_visits_tsv, diagnoses_tsv, dwi_map, tissue_type, threshold, fwhm)
         self._validation = None
@@ -270,10 +272,19 @@ class DWI_VB_RepHoldOut_DualSVM_FeatureSelectionNonNested(MLWorkflow):
         x = self._input.get_x()
         y = self._input.get_y()
 
-        ### first do feature rescaling
-        selector = StandardScaler(with_std=True)
-        selector.fit(x)
-        x = selector.transform(x)
+        ### feature rescaling
+        if self._feature_rescaling_method == 'zscore':
+            selector = StandardScaler(with_std=True)
+            selector.fit(x)
+            x = selector.transform(x)
+        elif self._feature_rescaling_method == 'minmax':
+            selector = MinMaxScaler()
+            selector.fit(x)
+            x = selector.transform(x)
+        elif self._feature_rescaling_method == None:
+            pass
+        else:
+            raise Exception('Method has not been implemented')
 
         ## feature selection for all the data
         if self._feature_selection_method == 'ANOVA':
@@ -282,7 +293,7 @@ class DWI_VB_RepHoldOut_DualSVM_FeatureSelectionNonNested(MLWorkflow):
         elif self._feature_selection_method == 'RF':
             clf = RandomForestClassifier(n_estimators=250, random_state=0, n_jobs=-1)
             clf.fit(x, y)
-            selector = SelectFromModel(clf, threshold= self._top_k)
+            selector = SelectFromModel(clf, threshold = self._top_k)
             selector.fit(x, y)
         elif self._feature_selection_method == 'PCA':
             selector = PCA(n_components=self._top_k)
@@ -295,10 +306,6 @@ class DWI_VB_RepHoldOut_DualSVM_FeatureSelectionNonNested(MLWorkflow):
         else:
             print('Method has not been implemented')
         x_after_fs = selector.transform(x)
-
-        print 'In total, there are %d voxels in this task' % x.shape[1]
-        print 'The threshold is %f' % (self._top_k)
-        print 'We select the %d most discriminative voxels' % x_after_fs.shape[1]
 
         kernel = utils.gram_matrix_linear(x_after_fs)
         if y[0] == 0:
@@ -350,8 +357,8 @@ class DWI_VB_RepHoldOut_DualSVM_FeatureSelectionNested(MLWorkflow):
         self._splits_indices = splits_indices
         self._caps_reg_method = caps_reg_method
         self._top_k = top_k
-        self._feature_selection_method= feature_selection_method
-        self._feature_rescaling_method= feature_rescaling_method
+        self._feature_selection_method = feature_selection_method
+        self._feature_rescaling_method = feature_rescaling_method
 
         self._input = DWIVoxelBasedInput(caps_directory, subjects_visits_tsv, diagnoses_tsv, dwi_map, tissue_type, threshold, fwhm, self._caps_reg_method)
         self._validation = None

@@ -237,18 +237,19 @@ class DualSVMAlgorithmFeatureSelection(base.MLAlgorithm):
         for i in range(self._grid_search_folds):
             async_result[i] = {}
 
-        ### always do feature rescaling
+        ### feature rescaling
         if self._feature_rescaling_method == 'zscore':
             selector = StandardScaler(with_std=self._with_std)
             selector.fit(self._x[train_index])
-            # x_after_fs = normalization_per_feature(self._x, train_index, method='zscore')
+            x_after = selector.transform(self._x)
         elif self._feature_rescaling_method == 'minmax':
             selector = MinMaxScaler()
             selector.fit(self._x[train_index])
+            x_after = selector.transform(self._x)
+        elif self._feature_rescaling_method == None:
+            x_after = self._x
         else:
             raise Exception('Method has not been implemented')
-
-        x_after = selector.transform(self._x)
 
         ## then do feautre selection
         if self._feature_selection_method == 'ANOVA':
