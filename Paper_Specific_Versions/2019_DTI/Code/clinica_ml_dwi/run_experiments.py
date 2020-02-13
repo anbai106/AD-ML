@@ -904,22 +904,464 @@ def classification_performances_violin_plot_neuroinformatics(classification_outp
                                  'figure_t1w_vs_dti.png'), additional_artists=plt.legend,
                     bbox_inches="tight")
 
+    elif task_name == 'Balanced_vs_imbalanced':
+        ## results list to contain both DTI and T1
+        results_voxel_fa = []
+        results_voxel_md = []
+        results_roi_fa = []
+        results_roi_md = []
+
+        tissue_combinations = ['GM_WM']
+        # atlases = ['JHUTracts25']
+        tasks_list = ['CN_vs_MCI', 'CN_vs_pMCI', 'sMCI_vs_pMCI']
+
+        ## get original without any trick FA
+        for task in tasks_list:
+            for tissue in tissue_combinations:
+                tsvs_path = os.path.join(classification_output_dir, 'DWIWithFeatureRescalingVoxelBalancedSklearnOffWithoutAnyTrick',
+                                         task + '_VB_' + tissue + '_0.3_8_fa')
+                balanced_accuracy = []
+                for i in xrange(n_iterations):
+                    result_tsv = os.path.join(tsvs_path, 'iteration-' + str(i), 'results.tsv')
+                    if os.path.isfile(result_tsv):
+                        balanced_accuracy.append(
+                            (pd.read_csv(result_tsv, sep='\t')).balanced_accuracy[0])
+                    else:
+                        raise OSError(
+                            errno.ENOENT, os.strerror(errno.ENOENT), result_tsv)
+                results_voxel_fa.append(balanced_accuracy)
+
+        ## get balanced downsample results for FA
+        for task in tasks_list:
+            for tissue in tissue_combinations:
+                tsvs_path = os.path.join(classification_output_dir, 'DWIWithFeatureRescalingVoxelRandomBalancedData',
+                                         task + '_VB_' + tissue + '_0.3_8_fa')
+                balanced_accuracy = []
+                for i in xrange(n_iterations):
+                    result_tsv = os.path.join(tsvs_path, 'iteration-' + str(i), 'results.tsv')
+                    if os.path.isfile(result_tsv):
+                        balanced_accuracy.append(
+                            (pd.read_csv(result_tsv, sep='\t')).balanced_accuracy[0])
+                    else:
+                        raise OSError(
+                            errno.ENOENT, os.strerror(errno.ENOENT), result_tsv)
+                results_voxel_fa.append(balanced_accuracy)
+
+        ## get original without any trick MD
+        for task in tasks_list:
+            for tissue in tissue_combinations:
+                tsvs_path = os.path.join(classification_output_dir, 'DWIWithFeatureRescalingVoxelBalancedSklearnOffWithoutAnyTrick',
+                                         task + '_VB_' + tissue + '_0.3_8_md')
+                balanced_accuracy = []
+                for i in xrange(n_iterations):
+                    result_tsv = os.path.join(tsvs_path, 'iteration-' + str(i), 'results.tsv')
+                    if os.path.isfile(result_tsv):
+                        balanced_accuracy.append(
+                            (pd.read_csv(result_tsv, sep='\t')).balanced_accuracy[0])
+                    else:
+                        raise OSError(
+                            errno.ENOENT, os.strerror(errno.ENOENT), result_tsv)
+                results_voxel_md.append(balanced_accuracy)
+
+        ## get balanced downsample results for MD
+        for task in tasks_list:
+            for tissue in tissue_combinations:
+                tsvs_path = os.path.join(classification_output_dir, 'DWIWithFeatureRescalingVoxelRandomBalancedData',
+                                         task + '_VB_' + tissue + '_0.3_8_md')
+                balanced_accuracy = []
+                for i in xrange(n_iterations):
+                    result_tsv = os.path.join(tsvs_path, 'iteration-' + str(i), 'results.tsv')
+                    if os.path.isfile(result_tsv):
+                        balanced_accuracy.append(
+                            (pd.read_csv(result_tsv, sep='\t')).balanced_accuracy[0])
+                    else:
+                        raise OSError(
+                            errno.ENOENT, os.strerror(errno.ENOENT), result_tsv)
+                results_voxel_md.append(balanced_accuracy)
+
+        ## get T1 JHUTract-FA without any trick for imbalance
+        for task in tasks_list:
+            tsvs_path = os.path.join(classification_output_dir, 'DWIWithFeatureRescalingROIBalancedSklearnOffWithoutAnyTrick',
+                                     task + '_RB_JHUTracts25', 'fa')
+            balanced_accuracy = []
+            for i in xrange(n_iterations):
+                result_tsv = os.path.join(tsvs_path, 'iteration-' + str(i), 'results.tsv')
+                if os.path.isfile(result_tsv):
+                    balanced_accuracy.append(
+                        (pd.read_csv(result_tsv, sep='\t')).balanced_accuracy[0])
+                else:
+                    raise OSError(
+                        errno.ENOENT, os.strerror(errno.ENOENT), result_tsv)
+            results_roi_fa.append(balanced_accuracy)
+
+        ## get T1 JHUTract-FA with random downsampling
+        for task in tasks_list:
+            tsvs_path = os.path.join(classification_output_dir, 'DWIWithFeatureRescalingROIRandomBalancedData',
+                                     task + '_RB_JHUTracts25', 'fa')
+            balanced_accuracy = []
+            for i in xrange(n_iterations):
+                result_tsv = os.path.join(tsvs_path, 'iteration-' + str(i), 'results.tsv')
+                if os.path.isfile(result_tsv):
+                    balanced_accuracy.append(
+                        (pd.read_csv(result_tsv, sep='\t')).balanced_accuracy[0])
+                else:
+                    raise OSError(
+                        errno.ENOENT, os.strerror(errno.ENOENT), result_tsv)
+            results_roi_fa.append(balanced_accuracy)
+
+        ## get T1 JHUTract-MD without any trick for imbalance
+        for task in tasks_list:
+            tsvs_path = os.path.join(classification_output_dir, 'DWIWithFeatureRescalingROIBalancedSklearnOffWithoutAnyTrick',
+                                     task + '_RB_JHUTracts25', 'md')
+            balanced_accuracy = []
+            for i in xrange(n_iterations):
+                result_tsv = os.path.join(tsvs_path, 'iteration-' + str(i), 'results.tsv')
+                if os.path.isfile(result_tsv):
+                    balanced_accuracy.append(
+                        (pd.read_csv(result_tsv, sep='\t')).balanced_accuracy[0])
+                else:
+                    raise OSError(
+                        errno.ENOENT, os.strerror(errno.ENOENT), result_tsv)
+            results_roi_md.append(balanced_accuracy)
+
+        ## get T1 JHUTract-FA with random downsampling
+        for task in tasks_list:
+            tsvs_path = os.path.join(classification_output_dir, 'DWIWithFeatureRescalingROIRandomBalancedData',
+                                     task + '_RB_JHUTracts25', 'md')
+            balanced_accuracy = []
+            for i in xrange(n_iterations):
+                result_tsv = os.path.join(tsvs_path, 'iteration-' + str(i), 'results.tsv')
+                if os.path.isfile(result_tsv):
+                    balanced_accuracy.append(
+                        (pd.read_csv(result_tsv, sep='\t')).balanced_accuracy[0])
+                else:
+                    raise OSError(
+                        errno.ENOENT, os.strerror(errno.ENOENT), result_tsv)
+            results_roi_md.append(balanced_accuracy)
+
+        ## voxel FA
+        ### transfer the list into an array with this shape: n_iterations * num_tasks
+        metric = np.array(results_voxel_fa).transpose()
+        ## rearranage the metric in order to have the right position for each task
+        index_order = [0, 3, 1, 4, 2, 5]
+        metric = metric[:, index_order]
+        ## define the violin's postions
+        pos = [1, 2, 4, 5, 7, 8]
+        color = ['#FF0000', '#87CEFA'] * len(tasks_list)  # red, blue and green
+        legendA = ['GM+WM-original', 'GM+WM-balanced']
+
+        ## define the size of th image
+        fig, ax = plt.subplots(2, figsize=[15, 10])
+        line_coll = ax[0].violinplot(metric, pos, widths=0.5, bw_method=0.2, showmeans=True, showextrema=False)
+        for cc, ln in enumerate(line_coll['bodies']):
+            ln.set_facecolor(color[cc])
+
+        ax[0].legend(legendA, loc='upper right', fontsize=10, frameon=True)
+        ax[0].grid(axis='y', which='major', linestyle='dotted')
+        ax[0].set_xticks([1.5 , 4.5, 7.5])
+        ax[0].set_yticks([0.1, 0.2, 0.3, 0.4, 0.5, 0.6, 0.7, 0.8, 0.9, 1.0])
+        ax[0].set_xticklabels(tasks_list, rotation=0, fontsize=15)  # 'vertical'
+        ax[0].set_ylabel('Balanced accuracy', rotation=90, fontsize=15)  # 'vertical'
+        mean = np.mean(metric, 0)
+        std = np.std(metric, 0)
+        inds = np.array(pos)
+        ax[0].vlines(inds, mean - std, mean + std, color='k', linestyle='solid', lw=0.5)
+        ax[0].vlines(inds, mean - std, mean + std, color='k', linestyle='solid', lw=0.5)
+        ax[0].hlines(mean - std, inds - 0.1, inds + 0.1, color='k', linestyle='solid', lw=0.5)
+        ax[0].hlines(mean + std, inds - 0.1, inds + 0.1, color='k', linestyle='solid', lw=0.5)
+        ax[0].set_ylim(0.1, 1)
+        ax[0].set_title('A: FA voxel-based features', fontsize=15)
+
+        ##### voxel MD
+        ### transfer the list into an array with this shape: n_iterations*n_tasks_imbalanced
+        metric = np.array(results_voxel_md).transpose()
+        ## rearranage the metric in order to have the right position for each task
+        metric = metric[:, index_order]
+        ## define the size of th image
+        line_coll = ax[1].violinplot(metric, pos, widths=0.5, bw_method=0.2, showmeans=True, showextrema=False)
+        for cc, ln in enumerate(line_coll['bodies']):
+            ln.set_facecolor(color[cc])
+
+        ax[1].legend(legendA, loc='upper right', fontsize=10, frameon=True)
+        ax[1].grid(axis='y', which='major', linestyle='dotted')
+        ax[1].set_xticks([1.5 , 4.5, 7.5])
+        ax[1].set_yticks([0.1, 0.2, 0.3, 0.4, 0.5, 0.6, 0.7, 0.8, 0.9, 1.0])
+        ax[1].set_xticklabels(tasks_list, rotation=0, fontsize=15)  # 'vertical'
+        ax[1].set_ylabel('Balanced accuracy', rotation=90, fontsize=15)  # 'vertical'
+        mean = np.mean(metric, 0)
+        std = np.std(metric, 0)
+        inds = np.array(pos)
+        ax[1].vlines(inds, mean - std, mean + std, color='k', linestyle='solid', lw=0.5)
+        ax[1].vlines(inds, mean - std, mean + std, color='k', linestyle='solid', lw=0.5)
+        ax[1].hlines(mean - std, inds - 0.1, inds + 0.1, color='k', linestyle='solid', lw=0.5)
+        ax[1].hlines(mean + std, inds - 0.1, inds + 0.1, color='k', linestyle='solid', lw=0.5)
+        ax[1].set_ylim(0.1, 1)
+        ax[1].set_title('B: MD voxel-based features', fontsize=15)
+
+        plt.savefig(os.path.join(classification_output_dir, 'figures',
+                                 'figure_influence_of_imbalance_VOXEL.png'), additional_artists=plt.legend,
+                    bbox_inches="tight")
+
+        ## ROI FA
+        ### transfer the list into an array with this shape: n_iterations * num_tasks
+        metric = np.array(results_roi_fa).transpose()
+        ## rearranage the metric in order to have the right position for each task
+        index_order = [0, 3, 1, 4, 2, 5]
+        metric = metric[:, index_order]
+        ## define the violin's postions
+        pos = [1, 2, 4, 5, 7, 8]
+        color = ['#FF0000', '#87CEFA'] * len(tasks_list)  # red, blue and green
+        legendB = ['JHUTract25-original', 'JHUTract25-balanced']
+
+        ## define the size of th image
+        fig, ax = plt.subplots(2, figsize=[15, 10])
+        line_coll = ax[0].violinplot(metric, pos, widths=0.5, bw_method=0.2, showmeans=True, showextrema=False)
+        for cc, ln in enumerate(line_coll['bodies']):
+            ln.set_facecolor(color[cc])
+
+        ax[0].legend(legendB, loc='upper right', fontsize=10, frameon=True)
+        ax[0].grid(axis='y', which='major', linestyle='dotted')
+        ax[0].set_xticks([1.5 , 4.5, 7.5])
+        ax[0].set_yticks([0.1, 0.2, 0.3, 0.4, 0.5, 0.6, 0.7, 0.8, 0.9, 1.0])
+        ax[0].set_xticklabels(tasks_list, rotation=0, fontsize=15)  # 'vertical'
+        ax[0].set_ylabel('Balanced accuracy', rotation=90, fontsize=15)  # 'vertical'
+        mean = np.mean(metric, 0)
+        std = np.std(metric, 0)
+        inds = np.array(pos)
+        ax[0].vlines(inds, mean - std, mean + std, color='k', linestyle='solid', lw=0.5)
+        ax[0].vlines(inds, mean - std, mean + std, color='k', linestyle='solid', lw=0.5)
+        ax[0].hlines(mean - std, inds - 0.1, inds + 0.1, color='k', linestyle='solid', lw=0.5)
+        ax[0].hlines(mean + std, inds - 0.1, inds + 0.1, color='k', linestyle='solid', lw=0.5)
+        ax[0].set_ylim(0.1, 1)
+        ax[0].set_title('A: FA region-based features', fontsize=15)
+
+        ##### voxel MD
+        ### transfer the list into an array with this shape: n_iterations*n_tasks_imbalanced
+        metric = np.array(results_roi_md).transpose()
+        ## rearranage the metric in order to have the right position for each task
+        metric = metric[:, index_order]
+        ## define the size of th image
+        line_coll = ax[1].violinplot(metric, pos, widths=0.5, bw_method=0.2, showmeans=True, showextrema=False)
+        for cc, ln in enumerate(line_coll['bodies']):
+            ln.set_facecolor(color[cc])
+
+        ax[1].legend(legendB, loc='upper right', fontsize=10, frameon=True)
+        ax[1].grid(axis='y', which='major', linestyle='dotted')
+        ax[1].set_xticks([1.5 , 4.5, 7.5])
+        ax[1].set_yticks([0.1, 0.2, 0.3, 0.4, 0.5, 0.6, 0.7, 0.8, 0.9, 1.0])
+        ax[1].set_xticklabels(tasks_list, rotation=0, fontsize=15)  # 'vertical'
+        ax[1].set_ylabel('Balanced accuracy', rotation=90, fontsize=15)  # 'vertical'
+        mean = np.mean(metric, 0)
+        std = np.std(metric, 0)
+        inds = np.array(pos)
+        ax[1].vlines(inds, mean - std, mean + std, color='k', linestyle='solid', lw=0.5)
+        ax[1].vlines(inds, mean - std, mean + std, color='k', linestyle='solid', lw=0.5)
+        ax[1].hlines(mean - std, inds - 0.1, inds + 0.1, color='k', linestyle='solid', lw=0.5)
+        ax[1].hlines(mean + std, inds - 0.1, inds + 0.1, color='k', linestyle='solid', lw=0.5)
+        ax[1].set_ylim(0.1, 1)
+        ax[1].set_title('B: MD region-based features', fontsize=15)
+
+        plt.savefig(os.path.join(classification_output_dir, 'figures',
+                                 'figure_influence_of_imbalance_REGION.png'), additional_artists=plt.legend,
+                    bbox_inches="tight")
+
+    elif task_name == 'Influence_of_fwhm':
+        ## results list to contain results with diff fwhm
+        results_fwhm = []
+        tissue_combinations = ['GM_WM']
+        tasks_list = ['AD_vs_CN']
+        fwhm_list = [0, 4, 8, 12]
+        metric_list = ['fa', 'md']
+
+        ## get DWI voxel with diff smoothing fwhm
+        for metric in metric_list:
+            for task in tasks_list:
+                for tissue in tissue_combinations:
+                    for f in fwhm_list:
+                        tsvs_path = os.path.join(classification_output_dir, 'DWIWithFeatureRescalingVoxel',
+                                                 task + '_VB_' + tissue + '_0.3_' + str(f) + '_' + metric)
+                        balanced_accuracy = []
+                        for i in xrange(n_iterations):
+                            result_tsv = os.path.join(tsvs_path, 'iteration-' + str(i), 'results.tsv')
+                            if os.path.isfile(result_tsv):
+                                balanced_accuracy.append(
+                                    (pd.read_csv(result_tsv, sep='\t')).balanced_accuracy[0])
+                            else:
+                                raise OSError(
+                                    errno.ENOENT, os.strerror(errno.ENOENT), result_tsv)
+                        results_fwhm.append(balanced_accuracy)
 
 
 
+        ## voxel plot
+        ### transfer the list into an array with this shape: n_iterations * num_tasks
+        metric = np.array(results_fwhm).transpose()
 
+        ## define the violin's postions
+        pos = [1, 2, 3, 4, 6, 7, 8, 9]
+        color = ['#FF0000', '#87CEFA', '#90EE90', 'y'] * len(metric_list)  # red, blue and green
+        legendA = ['No smoothing', 'fwhm=4mm', 'fwhm=8mm', 'fwhm=12mm']
 
+        ## define the size of th image
+        fig, ax = plt.subplots(1, figsize=[15, 10])
+        line_coll = ax.violinplot(metric, pos, widths=0.5, bw_method=0.2, showmeans=True, showextrema=False)
+        for cc, ln in enumerate(line_coll['bodies']):
+            ln.set_facecolor(color[cc])
 
+        ax.legend(legendA, loc='lower right', fontsize=10, frameon=True)
+        ax.grid(axis='y', which='major', linestyle='dotted')
+        ax.set_xticks([2.5, 7.5])
+        ax.set_yticks([0.1, 0.2, 0.3, 0.4, 0.5, 0.6, 0.7, 0.8, 0.9, 1.0])
+        ax.set_xticklabels(tasks_list, rotation=0, fontsize=15)  # 'vertical'
+        ax.set_ylabel('Balanced accuracy', rotation=90, fontsize=15)  # 'vertical'
+        mean = np.mean(metric, 0)
+        std = np.std(metric, 0)
+        inds = np.array(pos)
+        ax.vlines(inds, mean - std, mean + std, color='k', linestyle='solid', lw=0.5)
+        ax.vlines(inds, mean - std, mean + std, color='k', linestyle='solid', lw=0.5)
+        ax.hlines(mean - std, inds - 0.1, inds + 0.1, color='k', linestyle='solid', lw=0.5)
+        ax.hlines(mean + std, inds - 0.1, inds + 0.1, color='k', linestyle='solid', lw=0.5)
+        ax.set_ylim(0.4, 1)
+        ax.set_title('Influence of the smoothing on classification performance', fontsize=15)
 
+        plt.savefig(os.path.join(classification_output_dir, 'figures',
+                                 'figure_influence_of_fwhm.png'), additional_artists=plt.legend,
+                    bbox_inches="tight")
 
+    elif task_name == 'Influence_of_reg':
+        ## results for registration
+        results_fa = []
+        results_md = []
 
+        tissue_combinations = ['WM', 'GM', 'GM_WM']
+        tasks_list = ['AD_vs_CN']
 
+        ## get FA singlemodal
+        for task in tasks_list:
+            for tissue in tissue_combinations:
+                tsvs_path = os.path.join(classification_output_dir, 'DWIWithFeatureRescalingVoxel',
+                                         task + '_VB_' + tissue + '_0.3_8_fa')
+                balanced_accuracy = []
+                for i in xrange(n_iterations):
+                    result_tsv = os.path.join(tsvs_path, 'iteration-' + str(i), 'results.tsv')
+                    if os.path.isfile(result_tsv):
+                        balanced_accuracy.append(
+                            (pd.read_csv(result_tsv, sep='\t')).balanced_accuracy[0])
+                    else:
+                        raise OSError(
+                            errno.ENOENT, os.strerror(errno.ENOENT), result_tsv)
+                results_fa.append(balanced_accuracy)
 
+        ## get FA multimodal
+        for task in tasks_list:
+            for tissue in tissue_combinations:
+                tsvs_path = os.path.join(classification_output_dir, 'DWIWithFeatureRescalingVoxelMultimodalReg',
+                                         task + '_VB_' + tissue + '_0.3_8_fa')
+                balanced_accuracy = []
+                for i in xrange(n_iterations):
+                    result_tsv = os.path.join(tsvs_path, 'iteration-' + str(i), 'results.tsv')
+                    if os.path.isfile(result_tsv):
+                        balanced_accuracy.append(
+                            (pd.read_csv(result_tsv, sep='\t')).balanced_accuracy[0])
+                    else:
+                        raise OSError(
+                            errno.ENOENT, os.strerror(errno.ENOENT), result_tsv)
+                results_fa.append(balanced_accuracy)
 
+        ## get MD singlemodal
+        for task in tasks_list:
+            for tissue in tissue_combinations:
+                tsvs_path = os.path.join(classification_output_dir, 'DWIWithFeatureRescalingVoxel',
+                                         task + '_VB_' + tissue + '_0.3_8_md')
+                balanced_accuracy = []
+                for i in xrange(n_iterations):
+                    result_tsv = os.path.join(tsvs_path, 'iteration-' + str(i), 'results.tsv')
+                    if os.path.isfile(result_tsv):
+                        balanced_accuracy.append(
+                            (pd.read_csv(result_tsv, sep='\t')).balanced_accuracy[0])
+                    else:
+                        raise OSError(
+                            errno.ENOENT, os.strerror(errno.ENOENT), result_tsv)
+                results_md.append(balanced_accuracy)
 
+        ## get md multimodal
+        for task in tasks_list:
+            for tissue in tissue_combinations:
+                tsvs_path = os.path.join(classification_output_dir, 'DWIWithFeatureRescalingVoxelMultimodalReg',
+                                         task + '_VB_' + tissue + '_0.3_8_md')
+                balanced_accuracy = []
+                for i in xrange(n_iterations):
+                    result_tsv = os.path.join(tsvs_path, 'iteration-' + str(i), 'results.tsv')
+                    if os.path.isfile(result_tsv):
+                        balanced_accuracy.append(
+                            (pd.read_csv(result_tsv, sep='\t')).balanced_accuracy[0])
+                    else:
+                        raise OSError(
+                            errno.ENOENT, os.strerror(errno.ENOENT), result_tsv)
+                results_md.append(balanced_accuracy)
 
+        ## voxel plot fa
+        ### transfer the list into an array with this shape: n_iterations * num_tasks
+        metric = np.array(results_fa).transpose()
+        ## rearranage the metric in order to have the right position for each task
+        index_order = [0, 3, 2, 4, 3, 5]
+        metric = metric[:, index_order]
+        ## define the violin's postions
+        pos = [1, 2, 4, 5, 7, 8]
+        color = ['#FF0000', '#87CEFA', '#90EE90'] * len(tissue_combinations)  # red, blue and green
+        legendA = ['Single-modal', 'Multimodal']
 
+        ## define the size of th image
+        fig, ax = plt.subplots(2, figsize=[15, 10])
+        line_coll = ax[0].violinplot(metric, pos, widths=0.5, bw_method=0.2, showmeans=True, showextrema=False)
+        for cc, ln in enumerate(line_coll['bodies']):
+            ln.set_facecolor(color[cc])
 
+        ax[0].legend(legendA, loc='lower right', fontsize=10, frameon=True)
+        ax[0].grid(axis='y', which='major', linestyle='dotted')
+        ax[0].set_xticks([1.5, 4.5, 7.5])
+        ax[0].set_yticks([0.1, 0.2, 0.3, 0.4, 0.5, 0.6, 0.7, 0.8, 0.9, 1.0])
+        ax[0].set_xticklabels(tissue_combinations, rotation=0, fontsize=15)  # 'vertical'
+        ax[0].set_ylabel('Balanced accuracy', rotation=90, fontsize=15)  # 'vertical'
+        mean = np.mean(metric, 0)
+        std = np.std(metric, 0)
+        inds = np.array(pos)
+        ax[0].vlines(inds, mean - std, mean + std, color='k', linestyle='solid', lw=0.5)
+        ax[0].vlines(inds, mean - std, mean + std, color='k', linestyle='solid', lw=0.5)
+        ax[0].hlines(mean - std, inds - 0.1, inds + 0.1, color='k', linestyle='solid', lw=0.5)
+        ax[0].hlines(mean + std, inds - 0.1, inds + 0.1, color='k', linestyle='solid', lw=0.5)
+        ax[0].set_ylim(0.4, 1)
+        ax[0].set_title('A: FA feature for different registration methods', fontsize=15)
+
+        ##### ROI
+        ### transfer the list into an array with this shape: n_iterations*n_tasks_imbalanced
+        metric = np.array(results_md).transpose()
+        ## rearranage the metric in order to have the right position for each task
+        metric = metric[:, index_order]
+        ## define the size of th image
+        line_coll = ax[1].violinplot(metric, pos, widths=0.5, bw_method=0.2, showmeans=True, showextrema=False)
+        for cc, ln in enumerate(line_coll['bodies']):
+            ln.set_facecolor(color[cc])
+
+        ax[1].legend(legendA, loc='lower right', fontsize=10, frameon=True)
+        ax[1].grid(axis='y', which='major', linestyle='dotted')
+        ax[1].set_xticks([1.5, 4.5, 7.5])
+        ax[1].set_yticks([0.1, 0.2, 0.3, 0.4, 0.5, 0.6, 0.7, 0.8, 0.9, 1.0])
+        ax[1].set_xticklabels(tissue_combinations, rotation=0, fontsize=15)  # 'vertical'
+        ax[1].set_ylabel('Balanced accuracy', rotation=90, fontsize=15)  # 'vertical'
+        mean = np.mean(metric, 0)
+        std = np.std(metric, 0)
+        inds = np.array(pos)
+        ax[1].vlines(inds, mean - std, mean + std, color='k', linestyle='solid', lw=0.5)
+        ax[1].vlines(inds, mean - std, mean + std, color='k', linestyle='solid', lw=0.5)
+        ax[1].hlines(mean - std, inds - 0.1, inds + 0.1, color='k', linestyle='solid', lw=0.5)
+        ax[1].hlines(mean + std, inds - 0.1, inds + 0.1, color='k', linestyle='solid', lw=0.5)
+        ax[1].set_ylim(0.4, 1)
+        ax[1].set_title('B: MD feature for different registration methods', fontsize=15)
+
+        plt.savefig(os.path.join(classification_output_dir, 'figures',
+                                 'figure_influence_of_reg.png'), additional_artists=plt.legend,
+                    bbox_inches="tight")
 
 
     #
