@@ -33,10 +33,10 @@ task_name = 'Influence_of_reg'
 # ########################
 classification_result_path = '/run/user/1000/gvfs/sftp:host=cbica-cluster,user=wenju/cbica/home/wenju/Dataset/Neuroinformatics_CAPS/classification_output'
 metric = 'fa'
-task_name = 'Influence_of_feature_selection'
-classification_performances_scatter_plot_feature_selection_neuroinformatics(classification_result_path, task_name, metric=metric, fs_technique='ANOVA+RFE')
-metric = 'md'
-classification_performances_scatter_plot_feature_selection_neuroinformatics(classification_result_path, task_name, metric=metric, fs_technique='ANOVA+RFE')
+# task_name = 'Influence_of_feature_selection'
+# classification_performances_scatter_plot_feature_selection_neuroinformatics(classification_result_path, task_name, metric=metric, fs_technique='ANOVA+RFE')
+# metric = 'md'
+# classification_performances_scatter_plot_feature_selection_neuroinformatics(classification_result_path, task_name, metric=metric, fs_technique='ANOVA+RFE')
 
 # ########################
 # ### Figure influence of modality

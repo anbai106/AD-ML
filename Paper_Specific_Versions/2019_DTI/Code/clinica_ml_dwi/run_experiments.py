@@ -72,7 +72,7 @@ def run_dwi_voxel_without_feature_rescaling(caps_directory, diagnoses_tsv, subje
 #############################
 def run_dwi_roi_without_feature_rescaling(caps_directory, diagnoses_tsv, subjects_visits_tsv, output_dir, atlas,
                                 task, n_threads, n_iterations, test_size, grid_search_folds,
-                                 dwi_maps=['fa', 'md']):
+                                 dwi_maps=['md']):
     """
         This is to run ROI-wise classification for DTI without feature rescaling.
     Args:
@@ -1467,8 +1467,13 @@ def classification_performances_scatter_plot_feature_selection_neuroinformatics(
 
     elif task_name == 'Influence_of_modality':
         results_balanced_acc_nested_rfe_t1w = []
-        results_balanced_acc_nested_rfe_dti_fa = []
-        results_balanced_acc_nested_rfe_dti_md = []
+        results_balanced_acc_nested_rfe_dti_fa_GM = []
+        results_balanced_acc_nested_rfe_dti_md_GM = []
+        results_balanced_acc_nested_rfe_dti_fa_GM_WM = []
+        results_balanced_acc_nested_rfe_dti_md_GM_WM = []
+        results_balanced_acc_nested_rfe_dti_fa_WM = []
+        results_balanced_acc_nested_rfe_dti_md_WM = []
+
 
         x_persent_voxels = ['1', '10', '20', '30', '40', '50', '60', '70', '80', '90', '100']
 
@@ -1487,6 +1492,7 @@ def classification_performances_scatter_plot_feature_selection_neuroinformatics(
                         errno.ENOENT, os.strerror(errno.ENOENT), result_tsv)
                 results_balanced_acc_nested_rfe_t1w.append(balanced_accuracy)
 
+            ### GM
             for k in x_persent_voxels:
                 result_tsv = os.path.join(classification_result_path,
                                           'DWIWithFeatureRescalingFeatureSelectionVoxelNestedFSRFE',
@@ -1498,7 +1504,7 @@ def classification_performances_scatter_plot_feature_selection_neuroinformatics(
                 else:
                     raise OSError(
                         errno.ENOENT, os.strerror(errno.ENOENT), result_tsv)
-                results_balanced_acc_nested_rfe_dti_fa.append(balanced_accuracy)
+                results_balanced_acc_nested_rfe_dti_fa_GM.append(balanced_accuracy)
 
             for k in x_persent_voxels:
                 result_tsv = os.path.join(classification_result_path,
@@ -1511,8 +1517,61 @@ def classification_performances_scatter_plot_feature_selection_neuroinformatics(
                 else:
                     raise OSError(
                         errno.ENOENT, os.strerror(errno.ENOENT), result_tsv)
-                results_balanced_acc_nested_rfe_dti_md.append(balanced_accuracy)
+                results_balanced_acc_nested_rfe_dti_md_GM.append(balanced_accuracy)
 
+            ## WM
+            for k in x_persent_voxels:
+                result_tsv = os.path.join(classification_result_path,
+                                          'DWIWithFeatureRescalingFeatureSelectionVoxelNestedFSRFE',
+                                          'AD_vs_CN_VB_WM_0.3_8_fs_' + str(k) + '_fa', 'mean_results.tsv')
+                balanced_accuracy = []
+
+                if os.path.isfile(result_tsv):
+                    balanced_accuracy.append((pd.read_csv(result_tsv, sep='\t')).balanced_accuracy[0])
+                else:
+                    raise OSError(
+                        errno.ENOENT, os.strerror(errno.ENOENT), result_tsv)
+                results_balanced_acc_nested_rfe_dti_fa_WM.append(balanced_accuracy)
+
+            for k in x_persent_voxels:
+                result_tsv = os.path.join(classification_result_path,
+                                          'DWIWithFeatureRescalingFeatureSelectionVoxelNestedFSRFE',
+                                          'AD_vs_CN_VB_WM_0.3_8_fs_' + str(k) + '_md', 'mean_results.tsv')
+                balanced_accuracy = []
+
+                if os.path.isfile(result_tsv):
+                    balanced_accuracy.append((pd.read_csv(result_tsv, sep='\t')).balanced_accuracy[0])
+                else:
+                    raise OSError(
+                        errno.ENOENT, os.strerror(errno.ENOENT), result_tsv)
+                results_balanced_acc_nested_rfe_dti_md_WM.append(balanced_accuracy)
+
+            ## GM_WM
+            for k in x_persent_voxels:
+                result_tsv = os.path.join(classification_result_path,
+                                          'DWIWithFeatureRescalingFeatureSelectionVoxelNestedFSRFE',
+                                          'AD_vs_CN_VB_GM_WM_0.3_8_fs_' + str(k) + '_fa', 'mean_results.tsv')
+                balanced_accuracy = []
+
+                if os.path.isfile(result_tsv):
+                    balanced_accuracy.append((pd.read_csv(result_tsv, sep='\t')).balanced_accuracy[0])
+                else:
+                    raise OSError(
+                        errno.ENOENT, os.strerror(errno.ENOENT), result_tsv)
+                results_balanced_acc_nested_rfe_dti_fa_GM_WM.append(balanced_accuracy)
+
+            for k in x_persent_voxels:
+                result_tsv = os.path.join(classification_result_path,
+                                          'DWIWithFeatureRescalingFeatureSelectionVoxelNestedFSRFE',
+                                          'AD_vs_CN_VB_GM_WM_0.3_8_fs_' + str(k) + '_md', 'mean_results.tsv')
+                balanced_accuracy = []
+
+                if os.path.isfile(result_tsv):
+                    balanced_accuracy.append((pd.read_csv(result_tsv, sep='\t')).balanced_accuracy[0])
+                else:
+                    raise OSError(
+                        errno.ENOENT, os.strerror(errno.ENOENT), result_tsv)
+                results_balanced_acc_nested_rfe_dti_md_GM_WM.append(balanced_accuracy)
 
             num_rois = len(x_persent_voxels)
             # x = np.asarray(x_persent_voxels, dtype=float)
@@ -1525,15 +1584,23 @@ def classification_performances_scatter_plot_feature_selection_neuroinformatics(
             ax.spines["top"].set_visible(False)
             ax.spines["right"].set_visible(False)
 
-            ax.scatter(x, results_balanced_acc_nested_rfe_t1w, s=200, c='g', marker="^", label='GM-density')
-            ax.scatter(x, results_balanced_acc_nested_rfe_dti_fa, s=200, c='r', marker="o", label='GM-fa')
-            ax.scatter(x, results_balanced_acc_nested_rfe_dti_md, s=200, c='b', marker="d", label='GM-md')
+            ax.scatter(x, results_balanced_acc_nested_rfe_t1w, s=100, c='g', marker="^", label='GM-density')
+            ax.scatter(x, results_balanced_acc_nested_rfe_dti_fa_GM, s=100, c='r', marker="o", label='GM-FA')
+            ax.scatter(x, results_balanced_acc_nested_rfe_dti_md_GM, s=100, c='b', marker="o", label='GM-MD')
+            ax.scatter(x, results_balanced_acc_nested_rfe_dti_fa_WM, s=100, c='y', marker="o", label='WM-FA')
+            ax.scatter(x, results_balanced_acc_nested_rfe_dti_md_WM, s=100, c='m', marker="o", label='WM-MD')
+            ax.scatter(x, results_balanced_acc_nested_rfe_dti_fa_GM_WM, s=100, c='c', marker="o", label='GM+WM-FA')
+            ax.scatter(x, results_balanced_acc_nested_rfe_dti_md_GM_WM, s=100, c='k', marker="o", label='GM+WM-MD')
 
             plt.plot(x, results_balanced_acc_nested_rfe_t1w, c='g', linestyle='-')
-            plt.plot(x, results_balanced_acc_nested_rfe_dti_fa, c='r', linestyle='-.')
-            plt.plot(x, results_balanced_acc_nested_rfe_dti_md, c='b', linestyle='--')
+            plt.plot(x, results_balanced_acc_nested_rfe_dti_fa_GM, c='r', linestyle='-.')
+            plt.plot(x, results_balanced_acc_nested_rfe_dti_md_GM, c='b', linestyle='--')
+            plt.plot(x, results_balanced_acc_nested_rfe_dti_fa_WM, c='y', linestyle='--')
+            plt.plot(x, results_balanced_acc_nested_rfe_dti_md_WM, c='m', linestyle='--')
+            plt.plot(x, results_balanced_acc_nested_rfe_dti_fa_GM_WM, c='c', linestyle='--')
+            plt.plot(x, results_balanced_acc_nested_rfe_dti_md_GM_WM, c='k', linestyle='--')
 
-            plt.legend(loc='upper right', fontsize=25, frameon=False)
+            plt.legend(loc='upper right', fontsize=15, frameon=False)
             # plt.xticks(x, x_persent_voxels, rotation='vertical')
             plt.xticks(x, x_persent_voxels)
             plt.tick_params(axis='x', labelsize=20)

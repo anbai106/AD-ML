@@ -1,0 +1,66 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<project version="4">
+  <component name="ChangeListManager">
+    <list default="true" id="c5cfe20e-e4e3-42a0-ba0b-6343ca852226" name="Default Changelist" comment="">
+      <change beforePath="$PROJECT_DIR$/../../clinica_ml_dwi/algorithm_dwi.py" beforeDir="false" afterPath="$PROJECT_DIR$/../../clinica_ml_dwi/algorithm_dwi.py" afterDir="false" />
+      <change beforePath="$PROJECT_DIR$/../../clinica_ml_dwi/mlworkflow_dwi.py" beforeDir="false" afterPath="$PROJECT_DIR$/../../clinica_ml_dwi/mlworkflow_dwi.py" afterDir="false" />
+      <change beforePath="$PROJECT_DIR$/../../clinica_ml_dwi/run_experiments.py" beforeDir="false" afterPath="$PROJECT_DIR$/../../clinica_ml_dwi/run_experiments.py" afterDir="false" />
+      <change beforePath="$PROJECT_DIR$/10_run_neuroinformatics_figures.py" beforeDir="false" afterPath="$PROJECT_DIR$/10_run_neuroinformatics_figures.py" afterDir="false" />
+      <change beforePath="$PROJECT_DIR$/1_run_original_dwi_without_feature_rescaling.py" beforeDir="false" afterPath="$PROJECT_DIR$/1_run_original_dwi_without_feature_rescaling.py" afterDir="false" />
+    </list>
+    <option name="SHOW_DIALOG" value="false" />
+    <option name="HIGHLIGHT_CONFLICTS" value="true" />
+    <option name="HIGHLIGHT_NON_ACTIVE_CHANGELIST" value="false" />
+    <option name="LAST_RESOLUTION" value="IGNORE" />
+  </component>
+  <component name="Git.Settings">
+    <option name="RECENT_GIT_ROOT_PATH" value="$PROJECT_DIR$/../../../../.." />
+  </component>
+  <component name="ProjectId" id="1dVuMwir0MJKHpLDvU8U7rCD5JE" />
+  <component name="ProjectLevelVcsManager" settingsEditedManually="true" />
+  <component name="ProjectViewState">
+    <option name="hideEmptyMiddlePackages" value="true" />
+    <option name="showExcludedFiles" value="true" />
+    <option name="showLibraryContents" value="true" />
+  </component>
+  <component name="PropertiesComponent">
+    <property name="RunOnceActivity.ShowReadmeOnStart" value="true" />
+    <property name="WebServerToolWindowFactoryState" value="false" />
+    <property name="last_opened_file_path" value="$PROJECT_DIR$/../../../../../../../../pyHYDRA" />
+  </component>
+  <component name="ServiceViewManager">
+    <option name="viewStates">
+      <list>
+        <serviceView>
+          <treeState>
+            <expand />
+            <select />
+          </treeState>
+        </serviceView>
+      </list>
+    </option>
+  </component>
+  <component name="SvnConfiguration">
+    <configuration />
+  </component>
+  <component name="TaskManager">
+    <task active="true" id="Default" summary="Default task">
+      <changelist id="c5cfe20e-e4e3-42a0-ba0b-6343ca852226" name="Default Changelist" comment="" />
+      <created>1592522536601</created>
+      <option name="number" value="Default" />
+      <option name="presentableId" value="Default" />
+      <updated>1592522536601</updated>
+      <workItem from="1592522539038" duration="84000" />
+    </task>
+    <servers />
+  </component>
+  <component name="TypeScriptGeneratedFilesManager">
+    <option name="version" value="1" />
+  </component>
+  <component name="WindowStateProjectService">
+    <state x="3623" y="477" width="424" height="484" key="FileChooserDialogImpl" timestamp="1592522620963">
+      <screen x="2560" y="0" width="2560" height="1440" />
+    </state>
+    <state x="3623" y="477" width="424" height="484" key="FileChooserDialogImpl/67.27.2493.1413/2560.0.2560.1440@2560.0.2560.1440" timestamp="1592522620963" />
+  </component>
+</project>

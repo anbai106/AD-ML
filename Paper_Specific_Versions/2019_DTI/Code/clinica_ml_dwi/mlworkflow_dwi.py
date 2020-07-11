@@ -391,7 +391,7 @@ class DWI_VB_RepHoldOut_DualSVM_FeatureSelectionNested(MLWorkflow):
 
         self._algorithm.save_classifier(classifier, classifier_dir)
         self._algorithm.save_parameters(best_params, classifier_dir)
-        weights = self._algorithm.save_weights(classifier, x, classifier_dir)
+        weights = self._algorithm.save_weights(classifier, x, classifier_dir) ##TODO, the weight here to save the weight map is not correct for feature rescling or feature selection methods
 
         self._input.save_weights_as_nifti(weights, classifier_dir)
 

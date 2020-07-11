@@ -100,8 +100,9 @@ class DualSVMAlgorithm(base.MLAlgorithm):
             y_train_inner, y_test_inner = y_train[inner_train_index], y_train[inner_test_index]
 
             for c in self._c_range:
+                print("Inner CV for C=%f... \n" % c)
                 async_result[i][c] = inner_pool.apply_async(self._grid_search,
-                                                            (inner_kernel, x_test_inner,
+                                                            args=(inner_kernel, x_test_inner,
                                                              y_train_inner, y_test_inner, c))
                 #print i, c, async_result[i][c]
         inner_pool.close()
